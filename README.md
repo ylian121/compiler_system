@@ -63,6 +63,6 @@ continue, Continue, continue
 
 !=, NotEqual, !=
 
-variable_name, Ident, [a-zA-Z]([a-zA-Z]|[0-9]|_)*
+variable_name, Ident, \[a-zA-Z]([a-zA-Z]|[0-9]|_)*
 
 10311517, Num, [0-9]+
