@@ -11,7 +11,7 @@ if, If, if
 else, Else, else
 break, Break, break
 continue, Continue, continue
-(, LeftParen, \(
+(, LeftParen, (
 ), RightParen, )
 {, LeftCurly, {
 }, RightCurly, }
@@ -31,5 +31,5 @@ continue, Continue, continue
 >=, GreaterEqual, >=
 ==, Equality, ==
 !=, NotEqual, !=
-variable_name, Ident
-10311517, Num
+variable_name, Ident, [a-zA-Z]([a-zA-Z]|[0-9])*
+10311517, Num, [0-9]+
