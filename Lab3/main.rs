@@ -61,6 +61,20 @@ impl Lex {
             b ')' => { self.it.next(); Some(Tok::RightParen)},
             b '{' => { self.it.next(); Some(Tok::LeftCurly)},
             b '}' => { self.it.next(); Some(Tok::RightCurly)},
+            b '+' => { self.it.next(); Some(Tok::Plus)},
+            b '-' => { self.it.next(); Some(Tok::Subtract)},
+            b ',' => { self.it.next(); Some(Tok::Comma)},
+            b ';' => { self.it.next(); Some(Tok::Semicolon)},
+            b '*' => { self.it.next(); Some(Tok::Multiply)},
+            b '/' => { self.it.next(); Some(Tok::Divide)},
+            b '%' => { self.it.next(); Some(Tok::Modulus)},
+            b '=' => { self.it.next(); Some(Tok::Assign)},
+            b '<' => { self.it.next(); Some(Tok::Less)},
+            b '<=' => { self.it.next(); Some(Tok::LessEqual)},
+            b '>' => { self.it.next(); Some(Tok::Greater)},
+            b '>=' => { self.it.next(); Some(Tok::GreaterEqual)},
+            b '==' => { self.it.next(); Some(Tok::Equality)},
+            b '!=' => { self.it.next(); Some(Tok::NotEqual)},
             _ => 
         }
         //self.it.next();
