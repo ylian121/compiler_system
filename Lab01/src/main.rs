@@ -22,7 +22,7 @@ impl Lex {
         })
     }
     fn lex (&mut self) -> Option<Tok> {
-        //let byte = self.it.peek()?;
+        let byte = self.it.peek()?;
         self.it.next();
 
         Some(Tok::Ass)
