@@ -75,7 +75,7 @@ impl Lex {
             b '>=' => { self.it.next(); Some(Tok::GreaterEqual)},
             b '==' => { self.it.next(); Some(Tok::Equality)},
             b '!=' => { self.it.next(); Some(Tok::NotEqual)},
-            _ => 
+            _ => { self.problem = Some(format!("Lexer: found invalid char {}," _).into()); None }
         }
         //self.it.next();
 
