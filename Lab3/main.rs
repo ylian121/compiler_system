@@ -8,9 +8,40 @@ struct Lex {
     line: usize,
     problem: Option<Box<dyn Error>>,
 }
+
 #[derive(Debug)]
 enum Tok {
-    Ass,
+        Return, // "return"
+        Int, // "int"
+        Print, // "print"
+        Read, // "read"
+        While, // "while"
+        If, // "if"
+        Else, // "else"
+        Break, // "break"
+        Continue, // "continue"
+        LeftParen, // "("
+        RightParen, // ")"
+        LeftCurly, // "{"
+        RightCurly, // "}"
+        LeftBracket, // "["
+        RightBracket, // "]"
+        Comma, // ","
+        Semicolon, // ";"
+        Plus, // "+"
+        Substract, // "-"
+        Multiply, // "*"
+        Divide, // "/"
+        Modulus, // "%"
+        Assign, // "="
+        Less, // "<"
+        LessEqual, // "<="
+        Greater, // ">"
+        GreaterEqual, // ">="
+        Equality, // "=="
+        NotEqual, // "!="
+        Ident(Vec<u8>), // ([a-z]|[A-Z])([a-z]|[A-Z]|_|[0-9])*
+        Num(Vec<u8>) // [0-9]+
 }
 
 impl Lex {
@@ -23,11 +54,21 @@ impl Lex {
     }
     fn lex (&mut self) -> Option<Tok> {
         //let byte = self.it.peek()?;
-        self.it.next();
+        match self.it.peek()? {
+            b '[' => { self.it.next(); Some(Tok::LeftBracket)},
+            b ']' => { self.it.next(); Some(Tok::RightBracket)},
+            b '(' => { self.it.next(); Some(Tok::LeftParen)},
+            b ')' => { self.it.next(); Some(Tok::RightParen)},
+            b '{' => { self.it.next(); Some(Tok::LeftCurly)},
+            b '}' => { self.it.next(); Some(Tok::RightCurly)},
+            _ => 
+        }
+        //self.it.next();
 
-        Some(Tok::Ass)
+        //Some(Tok::Ass)
     }
 }
+
 fn main() -> Result<(), Box<dyn Error>> {
     // env::set_var("RUST_BACKTRACE", "full");
 
