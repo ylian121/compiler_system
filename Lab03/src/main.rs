@@ -10,7 +10,37 @@ struct Lex {
 }
 #[derive(Debug)]
 enum Tok {
-    Ass,
+    Return, // "return"
+    Int, // "int"
+    Print, // "print"
+    Read, // "read"
+    While, // "while"
+    If, // "if"
+    Else, // "else"
+    Break, // "break"
+    Continue, // "continue"
+    LeftParen, // "("
+    RightParen, // ")"
+    LeftCurly, // "{"
+    RightCurly, // "}"
+    LeftBracket, // "["
+    RightBracket, // "]"
+    Comma, // ","
+    Semicolon, // ";"
+    Plus, // "+"
+    Substract, // "-"
+    Multiply, // "*"
+    Divide, // "/"
+    Modulus, // "%"
+    Assign, // "="
+    Less, // "<"
+    LessEqual, // "<="
+    Greater, // ">"
+    GreaterEqual, // ">="
+    Equality, // "=="
+    NotEqual, // "!="
+    Ident, // ([a-z]|[A-Z])([a-z]|[A-Z]|_|[0-9])*
+    Num, // [0-9]+
 }
 
 impl Lex {
@@ -21,12 +51,49 @@ impl Lex {
             problem:None,
         })
     }
-    fn lex (&mut self) -> Option<Tok> {
-        let byte = self.it.peek()?;
-        self.it.next();
+    // fn lex (&mut self) -> Option<Tok> {
+    //     let byte = self.it.peek()?;
+    //     self.it.next();
 
-        Some(Tok::Ass)
+    //     Some(Tok::Ass)
+    // }
+
+    fn lex (&mut self) -> Option<Tok> {
+        // let byte = self.it.peek()?;
+        match self.it.peek()? {
+            b'[' => {self.it.next(); Some(Tok::LeftBracket)}, b']' => {self.it.next(); Some(Tok::RightBracket)},
+            b'(' => {self.it.next(); Some(Tok::LeftParen)}, b')' => {self.it.next(); Some(Tok::RightParen)},
+            b'{' => {self.it.next(); Some(Tok::LeftCurly)}, b'}' => {self.it.next(); Some(Tok::RightCurly)},
+            b'+' => {self.it.next(); Some(Tok::Plus)}, b'-' => {self.it.next(); Some(Tok::Substract)},
+            b'=' => {self.it.next(); Some(Tok::Assign)},
+            b'\n' => {self.line += 1; self.it.next(); self.lex()},
+            b' ' | b'\t' | b'\r' => {self.it.next(); self.lex()},
+            b'A' ..=b'Z' | b'a' ..=b'z' | b'_' => {self.lex_id()}, // TODO: Implement lex_id()
+            b'0' ..=b'9' => {return self.lex_num();}, // TODO: Implement lex_num()
+            b'#' => {return self.lex_com();}, // TODO: Implement lex_com()
+
+            ch => {self.problem = Some(format!("Lexer: found an invalid char {}", ch).into()); None}
+        }
     }
+
+    fn lex_id (&mut self) -> Option<Tok> {// TODO: Implement lex_id()
+        match self.it.peek()? {
+            
+        }
+    }
+
+    fn lex_num (&mut self) -> Option<Tok> {// TODO: Implement lex_num()
+        match self.it.peek()? {
+            
+        }
+    }
+
+    fn lex_com (&mut self) -> Option<Tok> {// TODO: Implement lex_com()
+        match self.it.peek()? {
+            
+        }
+    }
+
 }
 fn main() -> Result<(), Box<dyn Error>> {
     // env::set_var("RUST_BACKTRACE", "full");
