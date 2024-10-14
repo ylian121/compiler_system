@@ -11,6 +11,7 @@ struct Lex {
 
 #[derive(Debug)]
 enum Tok {
+        Func,
         Return, // "return"
         Int, // "int"
         Print, // "print"
@@ -40,7 +41,7 @@ enum Tok {
         GreaterEqual, // ">="
         Equality, // "=="
         NotEqual, // "!="
-        Ident(Vec<u8>), // ([a-z]|[A-Z])([a-z]|[A-Z]|_|[0-9])*
+        Id(Vec<u8>), // ([a-z]|[A-Z])([a-z]|[A-Z]|_|[0-9])*
         Num(Vec<u8>) // [0-9]+
 }
 
@@ -75,11 +76,34 @@ impl Lex {
             b '>=' => { self.it.next(); Some(Tok::GreaterEqual)},
             b '==' => { self.it.next(); Some(Tok::Equality)},
             b '!=' => { self.it.next(); Some(Tok::NotEqual)},
+            //ignoring newline and space so it will be called recursively
+            b '/n' => { self.line += 1; self.it.next(); self.lex()},
+            b ' ' => { self.it.next(); self.lex()},
+            b '0' ..=b '9' => { return self.lex_num(); },
+            b 'A' ..=b 'Z' | b 'a' ..=b 'z' | b '_' => { return self.lex_id(); },
             _ => { self.problem = Some(format!("Lexer: found invalid char {}," _).into()); None }
         }
         //self.it.next();
 
         //Some(Tok::Ass)
+    }
+    fn lex_id (&mut self) -> Option<Tok> {
+        //let byte = self.it.peek()?;
+        let mut id : Vec<u8> = vec![];
+        while let Some(byte) = self.it.peek(){
+            match byte {
+                b 'A' ..=b 'Z' | b 'a' ..=b 'z' | b '_' | b '0' ..=b '9' => { 
+                    id.push(*byte);
+                    self.it.next();
+                },
+                _ => { break },
+            }
+        }
+
+        Some(match &id[..]) {
+            b "fn" => {Tok::Func},
+            _ => { Tok::Id(id) },
+        }
     }
 }
 
