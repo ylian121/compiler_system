@@ -11,7 +11,7 @@ struct Lex {
 
 #[derive(Debug)]
 enum Tok {
-        Func,
+        Func, // "function"
         Return, // "return"
         Int, // "int"
         Print, // "print"
@@ -102,10 +102,21 @@ impl Lex {
 
         Some(match &id[..]) {
             b "fn" => {Tok::Func},
+            b "return" => {Tok::Return},
+            b "int" => {Tok::Int},
+            b "print" => {Tok::Print},
+            b "read" => {Tok::Read},
+            b "while" => {Tok::While},
+            b "if" => {Tok::If},
+            b "else" => {Tok::Else},
+            b "break" => {Tok::Break},
+            b "continue" => {Tok::Continue},
             _ => { Tok::Id(id) },
         }
     }
 }
+
+
 
 fn main() -> Result<(), Box<dyn Error>> {
     // env::set_var("RUST_BACKTRACE", "full");
