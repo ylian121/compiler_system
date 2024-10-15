@@ -71,15 +71,15 @@ impl Lex {
             b '%' => { self.it.next(); Some(Tok::Modulus)},
             b '=' => { self.it.next(); Some(Tok::Assign)},
             b '<' => { self.it.next(); Some(Tok::Less)},
-            b '<=' => { self.it.next(); Some(Tok::LessEqual)},
+            ///b '<=' => { self.it.next(); Some(Tok::LessEqual)},
             b '>' => { self.it.next(); Some(Tok::Greater)},
-            b '>=' => { self.it.next(); Some(Tok::GreaterEqual)},
-            b '==' => { self.it.next(); Some(Tok::Equality)},
-            b '!=' => { self.it.next(); Some(Tok::NotEqual)},
+            ///b '>=' => { self.it.next(); Some(Tok::GreaterEqual)},
+            ///b '==' => { self.it.next(); Some(Tok::Equality)},
+            ///b '!=' => { self.it.next(); Some(Tok::NotEqual)},
             //ignoring newline and space so it will be called recursively
-            b '/n' => { self.line += 1; self.it.next(); self.lex()},
+            b '\n' => { self.line += 1; self.it.next(); self.lex()},
             b ' ' => { self.it.next(); self.lex()},
-            b '0' ..=b '9' => { return self.lex_num(); },
+            ///b '0' ..=b '9' => { return self.lex_num(); },
             b 'A' ..=b 'Z' | b 'a' ..=b 'z' | b '_' => { return self.lex_id(); },
             _ => { self.problem = Some(format!("Lexer: found invalid char {}," _).into()); None }
         }
