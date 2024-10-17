@@ -42,7 +42,8 @@ enum Tok {
         Equality, // "=="
         NotEqual, // "!="
         Id(Vec<u8>), // ([a-z]|[A-Z])([a-z]|[A-Z]|_|[0-9])*
-        Num(Vec<u8>) // [0-9]+
+        Num(Vec<u8>), // [0-9]+
+        Com(Vec<u8>)
 }
 
 impl Lex {
@@ -123,6 +124,20 @@ impl Lex {
             match byte {
                 b '0' ..=b '9' => { 
                     num.push(*byte);
+                    self.it.next();
+                },
+                _ => { break },
+            }
+        }
+    }
+
+    fn lex_com (&mut self) -> Option<Tok> {
+        //let byte = self.it.peek()?;
+        let mut com : Vec<u8> = vec![];
+        while let Some(byte) = self.it.peek(){
+            match byte {
+                b '#' => { 
+                    com.push(*byte);
                     self.it.next();
                 },
                 _ => { break },
