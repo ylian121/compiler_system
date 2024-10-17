@@ -72,11 +72,11 @@ impl Lex {
             b '%' => { self.it.next(); Some(Tok::Modulus)},
             b '=' => { self.it.next(); Some(Tok::Assign)},
             b '<' => { self.it.next(); Some(Tok::Less)},
-            b '<=' => { self.it.next(); Some(Tok::LessEqual)},
+            b "<=" => { self.it.next(); Some(Tok::LessEqual)},
             b '>' => { self.it.next(); Some(Tok::Greater)},
-            b '>=' => { self.it.next(); Some(Tok::GreaterEqual)},
-            b '==' => { self.it.next(); Some(Tok::Equality)},
-            b '!=' => { self.it.next(); Some(Tok::NotEqual)},
+            b ">=" => { self.it.next(); Some(Tok::GreaterEqual)},
+            b "==" => { self.it.next(); Some(Tok::Equality)},
+            b "!=" => { self.it.next(); Some(Tok::NotEqual)},
             //ignoring newline and space so it will be called recursively
             b '\n' => { self.line += 1; self.it.next(); self.lex()},
             b ' ' => { self.it.next(); self.lex()},
@@ -129,6 +129,10 @@ impl Lex {
                 _ => { break },
             }
         }
+
+        Some(match &num[..] {
+            _ => { Tok::Num(num) },
+        })
     }
 
     fn lex_com (&mut self) -> Option<Tok> {
@@ -166,10 +170,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("");
 
+    /*
     if let Some(err) = lex.probelm {
         println!("Problem, line {}: {}", lex.line, err);
         return Err(err);
     }
+    */
 
     Ok(())
 }
