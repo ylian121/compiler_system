@@ -147,6 +147,7 @@ impl Lex {
                 _ => { break },
             }
         }
+        None
     }
 
     
