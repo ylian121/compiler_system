@@ -115,6 +115,22 @@ impl Lex {
             _ => { Tok::Id(id) },
         })
     }
+
+    fn lex_num (&mut self) -> Option<Tok> {
+        //let byte = self.it.peek()?;
+        let mut num : Vec<u8> = vec![];
+        while let Some(byte) = self.it.peek(){
+            match byte {
+                b '0' ..=b '9' => { 
+                    num.push(*byte);
+                    self.it.next();
+                },
+                _ => { break },
+            }
+        }
+    }
+
+    
 }
 
 
@@ -125,7 +141,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args : Vec<String> = std::env::args().collect();
     let mut lex = Lex::make(&args[1])?;
 
-    while let Some(tok) = lex.lex() {
+    while let Some(token) = lex.lex() {
         match token {
             Tok::Id(vec) | Tok::Num(vec) => { print!("{}, ", String::from_utf8_lossy(&vec[..])); },
             _ => { print!("{:?}, ", token); },
@@ -133,7 +149,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
-    println!("")
+    println!("");
 
     if let Some(err) = lex.probelm {
         println!("Problem, line {}: {}", lex.line, err);
