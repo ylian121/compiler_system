@@ -126,7 +126,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut lex = Lex::make(&args[1])?;
 
     while let Some(tok) = lex.lex() {
-        println!("{:?}", tok);
+        match token {
+            Tok::Id(vec) | Tok::Num(vec) => { print!("{}, ", String::from_utf8_lossy(&vec[..])); },
+            _ => { print!("{:?}, ", token); },
+
+        }
+    }
+
+    println!("")
+
+    if let Some(err) = lex.probelm {
+        println!("Problem, line {}: {}", lex.line, err);
+        return Err(err);
     }
 
     Ok(())
