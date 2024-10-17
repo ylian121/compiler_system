@@ -101,7 +101,7 @@ impl Lex {
             }
         }
 
-        Some(match &id[..]) {
+        Some(match &id[..] {
             b "fn" => {Tok::Func},
             b "return" => {Tok::Return},
             b "int" => {Tok::Int},
@@ -113,7 +113,7 @@ impl Lex {
             b "break" => {Tok::Break},
             b "continue" => {Tok::Continue},
             _ => { Tok::Id(id) },
-        }
+        })
     }
 }
 
