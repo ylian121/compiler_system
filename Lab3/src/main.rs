@@ -117,7 +117,7 @@ impl Lex {
             
             //ignoring newline and space so it will be called recursively
             b'\n' => { self.line += 1; self.it.next(); self.lex()},
-            b' ' => { self.it.next(); self.lex()},
+            b' ' | b'\t' | b'\r' => { self.it.next(); self.lex()},
             b'0' ..=b'9' => { return self.lex_num(); },
             b'A' ..=b'Z' | b'a' ..=b'z' | b'_' => { return self.lex_id(); },
             b'#' => { self.lex_com(); self.lex()},
@@ -209,12 +209,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("");
 
-    /*
-    if let Some(err) = lex.probelm {
+    
+    if let Some(err) = lex.problem {
         println!("Problem, line {}: {}", lex.line, err);
         return Err(err);
     }
-    */
+    
 
     Ok(())
 }
