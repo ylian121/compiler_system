@@ -57,7 +57,6 @@ impl Lex {
     fn lex (&mut self) -> Option<Tok> {
         //let byte = self.it.peek()?;
         match self.it.peek()? {
-            //b"==" => { self.it.next(); Some(Tok::Equality)},
             b'[' => { self.it.next(); Some(Tok::LeftBracket)},
             b']' => { self.it.next(); Some(Tok::RightBracket)},
             b'(' => { self.it.next(); Some(Tok::LeftParen)},
@@ -71,13 +70,51 @@ impl Lex {
             b'*' => { self.it.next(); Some(Tok::Multiply)},
             b'/' => { self.it.next(); Some(Tok::Divide)},
             b'%' => { self.it.next(); Some(Tok::Modulus)},
-            b'=' => { self.it.next(); Some(Tok::Assign)},
-            b'<' => { self.it.next(); Some(Tok::Less)},
+            // b'=' => { self.it.next(); Some(Tok::Assign)},
+            // b"==" => { self.it.next(); Some(Tok::Equality)},
+            b'=' => { 
+                self.it.next(); 
+                match self.it.peek()? {
+                    b'=' => {self.it.next(); Some(Tok::Equality)},
+                    _ => {Some(Tok::Assign)}
+                }
+                
+            },
+            // b'<' => { self.it.next(); Some(Tok::Less)},
+            b'<' => { 
+                self.it.next(); 
+                match self.it.peek()? {
+                    b'=' => {self.it.next(); Some(Tok::LessEqual)},
+                    _ => {Some(Tok::Less)}
+                }
+                
+            },
+            
             //b"<=" => { self.it.next(); Some(Tok::LessEqual)},
-            b'>' => { self.it.next(); Some(Tok::Greater)},
+            // b'>' => { self.it.next(); Some(Tok::Greater)},
+            // b'>' => { self.it.next(); Some(Tok::Greater)},
+
+            b'>' => { 
+                self.it.next(); 
+                match self.it.peek()? {
+                    b'=' => {self.it.next(); Some(Tok::GreaterEqual)},
+                    _ => {Some(Tok::Greater)}
+                }
+                
+            },
+
             //b">=" => { self.it.next(); Some(Tok::GreaterEqual)},
     
             //b"!=" => { self.it.next(); Some(Tok::NotEqual)},
+            b'!' => { 
+                self.it.next(); 
+                match self.it.peek()? {
+                    b'=' => {self.it.next(); Some(Tok::NotEqual)},
+                    ch => { self.problem = Some(format!("Lexer: found invalid char {}", ch).into()); None }
+                }
+                
+            },
+            
             //ignoring newline and space so it will be called recursively
             b'\n' => { self.line += 1; self.it.next(); self.lex()},
             b' ' => { self.it.next(); self.lex()},
@@ -145,7 +182,7 @@ impl Lex {
                     com.push(*byte);
                     self.it.next();
                 },
-                _ => { break },
+                b'\n' => { continue },
             }
         }
         None
