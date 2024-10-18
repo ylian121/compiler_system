@@ -43,7 +43,7 @@ enum Tok {
         NotEqual, // "!="
         Id(Vec<u8>), // ([a-z]|[A-Z])([a-z]|[A-Z]|_|[0-9])*
         Num(Vec<u8>), // [0-9]+
-        Com(Vec<u8>)
+        // Com(Vec<u8>)
 }
 
 impl Lex {
@@ -120,7 +120,7 @@ impl Lex {
             b' ' => { self.it.next(); self.lex()},
             b'0' ..=b'9' => { return self.lex_num(); },
             b'A' ..=b'Z' | b'a' ..=b'z' | b'_' => { return self.lex_id(); },
-            b'#' => { return self.lex_com(); },
+            b'#' => { self.lex_com(); self.lex()},
             ch => { self.problem = Some(format!("Lexer: found invalid char {}", ch).into()); None }
         }
         //self.it.next();
@@ -173,19 +173,19 @@ impl Lex {
         })
     }
 
-    fn lex_com (&mut self) -> Option<Tok> {
+    fn lex_com (&mut self){
         //let byte = self.it.peek()?;
-        let mut com : Vec<u8> = vec![];
-        while let Some(byte) = self.it.peek(){
-            match byte {
-                b'#' => { 
-                    com.push(*byte);
-                    self.it.next();
-                },
-                b'\n' => { continue },
+        // let mut com : Vec<u8> = vec![];
+        while let Some(byte) = self.it.next(){
+            match byte {                        
+                b'\n' => {break},
+                _ => {continue},
             }
         }
-        None
+            
+        
+
+        
     }
 
     
