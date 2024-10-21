@@ -16,6 +16,8 @@ LeftCurly stmts RightCurly
 
 stmts: 
   | stmt stmts
+  | Return stmt
+  | Return expr
 
 stmt: 
 Ident Assign expr
