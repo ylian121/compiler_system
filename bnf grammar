@@ -52,13 +52,17 @@ Num
 
 
 symbol:
-  | Less
   | Less 
   | LessEqual 
   | Greater 
   | GreaterEqual 
   | Equality 
   | NotEqual 
+  | Plus
+  | Subtract
+  | Multiply
+  | Divide
+  | Modulus
 
 
 expr_list:
