@@ -37,6 +37,7 @@ Num
   | Num Semicolon
   | Ident Semicolon
   | Ident LeftParen Num RightParen Semicolon
+  | Int LeftBracket Num RightBracket Ident Semicolon
   | LeftParen Plus expr expr RightParen Semicolon
   | LeftParen Subtract expr expr RightParen Semicolon
   | LeftParen Ident expr_list RightParen Semicolon
