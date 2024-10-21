@@ -30,6 +30,7 @@ Ident Assign expr
   | If expr block
   | Print LeftParen Num RightParen Semicolon
   | Print LeftParen Ident RightParen Semicolon
+  | Int LeftBracket Num RightBracket Ident Assign expr
 
 expr:
 Num
@@ -37,6 +38,7 @@ Num
   | Num Semicolon
   | Ident Semicolon
   | Ident LeftParen Num RightParen Semicolon
+  | Int LeftBracket Num RightBracket Ident
   | Int LeftBracket Num RightBracket Ident Semicolon
   | LeftParen Plus expr expr RightParen Semicolon
   | LeftParen Subtract expr expr RightParen Semicolon
