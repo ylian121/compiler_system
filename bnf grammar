@@ -28,14 +28,24 @@ Ident Assign expr
   | While expr block
   | If expr block Else expr
   | If expr block
+  | Print LeftParen Num RightParen Semicolon
+  | Print LeftParen Ident RightParen Semicolon
 
 expr:
-Num Semicolon
+Num
+  | Num Semicolon
   | Ident Semicolon
   | Ident LeftParen Num RightParen Semicolon
   | LeftParen Plus expr expr RightParen Semicolon
   | LeftParen Subtract expr expr RightParen Semicolon
   | LeftParen Ident expr_list RightParen Semicolon
+  | Ident Less expr
+  | Ident LessEqual expr
+  | Ident Greater expr
+  | Ident GreaterEqual expr
+  | Ident Equality expr
+  | Ident NotEqual expr
+
 
 expr_list:
   | expr expr_list
