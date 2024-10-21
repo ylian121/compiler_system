@@ -16,17 +16,21 @@ LeftCurly stmts RightCurly
 
 stmts: 
   | stmt stmts
-  | Return stmt
-  | Return expr
 
 stmt: 
 Ident Assign expr
   | LeftParen Num RightParen Ident Assign expr 
   | Ident Ident Semicolon
   | Int Ident Semicolon
+  | Int stmt
+  | Int LeftBracket Num RightBracket Ident Semicolon
+  | Ident LeftBracket Num RightBracket Assign Num Semicolon
   | Ident Ident LeftParen Num RightParen 
   | Break Semicolon
   | Continue Semicolon
+  | Return stmt
+  | Return expr
+  | Read LeftParen Ident RightParen
   | While expr block
   | If expr block Else expr
   | If expr block
@@ -40,7 +44,6 @@ Num
   | Num Semicolon
   | Ident Semicolon
   | Ident LeftParen Num RightParen Semicolon
-  | Int LeftBracket Num RightBracket Ident
   | Int LeftBracket Num RightBracket Ident Semicolon
   | LeftParen Plus expr expr RightParen Semicolon
   | LeftParen Subtract expr expr RightParen Semicolon
@@ -52,17 +55,17 @@ Num
 
 
 symbol:
+  | Multiply
+  | Divide
+  | Modulus
+  | Plus
+  | Subtract
   | Less 
   | LessEqual 
   | Greater 
   | GreaterEqual 
   | Equality 
   | NotEqual 
-  | Plus
-  | Subtract
-  | Multiply
-  | Divide
-  | Modulus
 
 
 expr_list:
