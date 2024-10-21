@@ -19,11 +19,12 @@ stmts:
 
 stmt: 
 Ident Assign expr
-  | LeftParen Num RightParen Ident Assign expr
-  | Ident Ident
-  | Ident Ident LeftParen Num RightParen
-  | Break
-  | Continue
+  | LeftParen Num RightParen Ident Assign expr Semicolon
+  | Ident Ident Semicolon
+  | Int Ident Semicolon
+  | Ident Ident LeftParen Num RightParen Semicolon
+  | Break Semicolon
+  | Continue Semicolon
   | While expr block
   | If expr block Else expr
   | If expr block
