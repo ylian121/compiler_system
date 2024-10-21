@@ -48,12 +48,17 @@ Num
   | Plus expr expr Semicolon
   | Subtract expr expr Semicolon
   | Ident expr_list Semicolon
-  | Ident Less expr
-  | Ident LessEqual expr
-  | Ident Greater expr
-  | Ident GreaterEqual expr
-  | Ident Equality expr
-  | Ident NotEqual expr
+  | Ident symbol expr
+
+
+symbol:
+  | Less
+  | Less 
+  | LessEqual 
+  | Greater 
+  | GreaterEqual 
+  | Equality 
+  | NotEqual 
 
 
 expr_list:
