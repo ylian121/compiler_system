@@ -1,0 +1,64 @@
+// start from the top when writing grammar
+// all lowercase words: non-terminal
+// words starting with uppercase: actual token
+
+prog:
+    | func prog
+
+func: Func Ident LeftParen param_list RightParen block
+
+param_list:
+          | params
+
+params: Int Ident Comma params
+      | Int Ident
+
+block: LeftCurly stmts RightCurly
+
+stmts: 
+     | stmt stmts
+
+stmt: Int LeftBracket Num RightBracket Ident Semicolon
+    | Int Ident Semicolon
+    | Int Ident Assign exp Semicolon
+    | Ident Assign exp Semicolon
+    | Ident LeftBracket Num RightBracket Assign exp Semicolon
+    | While exp block Semicolon
+    | If exp block
+    | If exp block Else exp block
+    | Print LeftParen exp RightParen Semicolon
+    | Read LeftParen Ident RightParen
+    | Ident LeftParen func_call_param_list RightParen Semicolon
+    | Return Semicolon
+    | Return expression Semicolon
+    | Break Semicolon
+    | Continue Semicolon
+
+func_call_param_list:
+                    | call_params
+
+call_params: exp Comma call_params
+           | exp
+
+exp: addexp Less addexp
+   | addexp LessEqual addexp
+   | addexp Greater addexp
+   | addexp GreaterEqual addexp
+   | addexp Equality addexp
+   | addexp NotEqual addexp
+   | addexp
+
+
+addexp: addexp Plus multexp
+      | addexp Substract multexp
+      | multexp
+
+multexp: multexp Multiply numexp
+       | multexp Divide numexp
+       | multexp Modulus numexp
+       | numexp
+
+numexp: Num
+      | Ident
+      | Ident LeftBracket Num RightBracket
+      | LeftBracket exp rightBracket
