@@ -30,7 +30,7 @@ stmt: Int LeftBracket Num RightBracket Ident Semicolon
     | Read LeftParen Ident RightParen
     | Ident LeftParen func_call_param_list RightParen Semicolon
     | Return Semicolon
-    | Return expression Semicolon
+    | Return exp Semicolon
     | Break Semicolon
     | Continue Semicolon
 
