@@ -1,0 +1,12 @@
+# Test file to test our lexer
+#based on the lexer_test_cases.zip on the lab's canvas course file
+
+func main() {
+  int a;
+  int b;
+  int c;
+  a = 100;
+  b = 50;
+  c = a + b;
+  print(c);
+}
