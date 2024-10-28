@@ -22,32 +22,31 @@ stmt: Int LeftBracket Num RightBracket Ident Semicolon
     | Int Ident Semicolon
     | Int Ident Assign exp Semicolon
     | Ident Assign exp Semicolon
-    | Ident LeftBracket Num RightBracket Assign exp Semicolon
-    | While exp block Semicolon
-    | If exp block
-    | If exp block Else exp block
+    | Ident LeftBracket exp RightBracket Assign exp Semicolon
+    | While bool_exp block Semicolon
+    | If bool_exp block
+    | If bool_exp block Else bool_exp block
     | Print LeftParen exp RightParen Semicolon
-    | Read LeftParen Ident RightParen
-    | Ident LeftParen func_call_param_list RightParen Semicolon
+    | Read LeftParen Ident RightParen Semicolon
+    | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
     | Return Semicolon
     | Return exp Semicolon
     | Break Semicolon
     | Continue Semicolon
 
-func_call_param_list:
-                    | call_params
+args:
+    | exp
+    | exp Comma args
 
-call_params: exp Comma call_params
-           | exp
+exp: exp Equality boolexp
+   | exp NotEqual boolexp
+   | boolexp
 
-exp: addexp Less addexp
-   | addexp LessEqual addexp
-   | addexp Greater addexp
-   | addexp GreaterEqual addexp
-   | addexp Equality addexp
-   | addexp NotEqual addexp
-   | addexp
-
+boolexp: boolexp Less addexp
+       | boolexp LessEqual addexp
+       | boolexp Greater addexp
+       | boolexp GreaterEqual addexp
+       | addexp
 
 addexp: addexp Plus multexp
       | addexp Substract multexp
@@ -56,9 +55,10 @@ addexp: addexp Plus multexp
 multexp: multexp Multiply numexp
        | multexp Divide numexp
        | multexp Modulus numexp
-       | numexp
+       | baseexp
 
-numexp: Num
-      | Ident
-      | Ident LeftBracket Num RightBracket
-      | Ident LeftBracket exp rightBracket
+baseexp: Num
+       | Ident
+       | Ident LeftBracket exp RightBracket
+       | Ident LeftParen args RightBracket
+       | LeftParen exp RightParen
