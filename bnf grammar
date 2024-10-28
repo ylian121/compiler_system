@@ -61,4 +61,4 @@ multexp: multexp Multiply numexp
 numexp: Num
       | Ident
       | Ident LeftBracket Num RightBracket
-      | LeftBracket exp rightBracket
+      | Ident LeftBracket exp rightBracket
