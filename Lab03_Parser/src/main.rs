@@ -1,7 +1,21 @@
+// TODO01: create Par struct
+// TODO02: create Par impl and its functions
+// TODO03: move lexing procedure to par's fn make()
+// TODO04: modify main function to call parser instead of lexer
+// TODO05: Add the rest of the grammar rules into the parser
+
 use std::iter::Peekable;
 use std::vec;
 use std::error::Error;
 // use std::env;
+
+struct Par {
+    lex: Lex, // generate token
+    toks: SliceDeque<Tok>, // buffers tokens
+    problem: Option<Box<dyn Error>>,
+    
+
+}
 
 struct Lex {
     it: Peekable<vec::IntoIter<u8>>,
