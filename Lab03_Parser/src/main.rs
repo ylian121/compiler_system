@@ -2,18 +2,53 @@
 // TODO02: create Par impl and its functions
 // TODO03: move lexing procedure to par's fn make()
 // TODO04: modify main function to call parser instead of lexer
-// TODO05: Add the rest of the grammar rules into the parser
+// TODO05: deal with temp values in expressions function
+// TODO06: Add the rest of the grammar rules into the parser impl
 
 use std::iter::Peekable;
 use std::vec;
 use std::error::Error;
+use slice_deque::SliceDeque;
 // use std::env;
 
 struct Par {
     lex: Lex, // generate token
     toks: SliceDeque<Tok>, // buffers tokens
     problem: Option<Box<dyn Error>>,
-    
+    // temp names --V
+    t_count: usize,
+    l_count: usize,
+}
+
+impl Par {
+    fn make(file_path: &str) -> Result<Par, Box<dyn Error>> {
+        Ok(Par{
+            lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
+            t_count: 0, l_count: 0,
+        })
+    }
+    fn tokens(&mut self, amt: usize) -> &mut [Tok] {
+
+        while self.toks.len() < amt {self.toks.push_back(self.lex.next());}
+
+        &mut self.toks[0..amt]
+    }
+
+    fn consume (&mut self, amt: usize) {for _ in 0..amt {self.toks.pop_front();}}
+
+    fn temp_name(&mut self) -> Vec<u8> {
+        let mut res = Vec::from(b"temp");
+        res.extend_from_slice(&self.l_count.to_string().into_bytes());
+        self.t_count += 1;
+        res
+    }
+
+    fn temp_label(&mut self) -> Vec<u8> {
+        let mut res = Vec::from(b"label");
+        res.extend_from_slice(&self.l_count.to_string().into_bytes());
+        self.l_count += 1;
+        res
+    }
 
 }
 
@@ -57,6 +92,7 @@ enum Tok {
     Ident(Vec<u8>), // ([a-z]|[A-Z])([a-z]|[A-Z]|_|[0-9])*
     Num(Vec<u8>), // [0-9]+
     // Comment(Vec<u8>),
+    Empty, // signals parser that no token would've been here
 }
 
 impl Lex {
@@ -73,6 +109,11 @@ impl Lex {
 
     //     Some(Tok::Ass)
     // }
+
+    fn next(&mut self) -> Tok { // NEW: We need this so that parser can call a function that returns a token
+        if let Some(tok) = self.lex() {tok}
+        else {Tok::Empty}
+    }
 
     fn lex (&mut self) -> Option<Tok> {
         // let byte = self.it.peek()?;
@@ -120,15 +161,16 @@ impl Lex {
             b'\n' => {self.line += 1; self.it.next(); self.lex()},
             b' ' | b'\t' | b'\r' => {self.it.next(); self.lex()},
 
-            b'A' ..=b'Z' | b'a' ..=b'z' | b'_' => {self.lex_id()}, // TODO: Implement lex_id()
-            b'0' ..=b'9' => {return self.lex_num();}, // TODO: Implement lex_num()
-            b'#' => {self.lex_com(); self.lex()}, // TODO: Implement lex_com()
+            b'A' ..=b'Z' | b'a' ..=b'z' | b'_' => {self.lex_id()},
+            b'0' ..=b'9' => {return self.lex_num();},
+            b'#' => {self.lex_com(); self.lex()},
+
 
             ch => {self.problem = Some(format!("Lexer: found an invalid char {}", ch).into()); None}
         }
     }
 
-    fn lex_id (&mut self) -> Option<Tok> {// TODO: Implement lex_id()
+    fn lex_id (&mut self) -> Option<Tok> {
         // since we're already here, then the first character of 'it' must be b'A' ..=b'Z' | b'a' ..=b'z' | b'_'
         let mut id : Vec<u8> = vec![];
         while let Some(byte) = self.it.peek() {
@@ -150,7 +192,7 @@ impl Lex {
 
     }
 
-    fn lex_num (&mut self) -> Option<Tok> {// TODO: Implement lex_id()
+    fn lex_num (&mut self) -> Option<Tok> {
         // only accept numbers
         let mut num : Vec<u8> = vec![];
         while let Some(byte) = self.it.peek() {
@@ -168,7 +210,7 @@ impl Lex {
         })
     }
 
-    fn lex_com (&mut self) {// TODO: Implement lex_com()
+    fn lex_com (&mut self) {
         // just consume all comment line, "lexer must NOT return comment tokens"
         while let Some(byte) = self.it.next() {
             match byte {b'\n' => {break}, _=> {continue},}
