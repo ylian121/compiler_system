@@ -59,6 +59,17 @@ impl Par {
             _ => {self.problem = Some(format!("Parsing Error: program").into()); None},
         }
     }
+    
+    fn expect (&mut self, t:Tok) -> Option<()> { // helper function thanks to Josue
+        if std::mem::discriminant(&t) == std::mem::discriminant(&self.tokens(1)[0]){
+            self.consume(1);
+            return Some(());
+        } else {
+            self.problem = Some(format!("Parsing Error: Expected {:?}...", t).into());
+            return None;
+        }
+        
+    }
 
     // func: Func Ident LeftParen param_list RightParen block
     // param_list:
@@ -124,16 +135,6 @@ impl Par {
         self.block();
     }
 
-    fn expect (&mut self, t:Tok) -> Option<()> {
-        if std::mem::discriminant(&t) == std::mem::discriminant(&self.tokens(1)[0]){
-            self.consume(1);
-            return Some(());
-        } else {
-            self.problem = Some(format!("Parsing Error: Expected {:?}...", t).into());
-            return None;
-        }
-        
-    }
 
 
 
