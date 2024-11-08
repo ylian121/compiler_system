@@ -225,15 +225,20 @@ fn args(&mut self) -> Option<()> {
 // | boolexp
 
 fn exp(&mut self) -> Option<()> {
-    self.exp()
-    match self.tokens(3) { // Func Ident LeftParen?
-        &mut [Tok::Function, Tok::Ident(ref mut id), Tok::LeftParen] => {
-            let name = std::mem::take(id);
-            self.consume(3); // we matched 3 tokens, no need for them anymore
-            name
+    self.boolexp()?;
+    match self.tokens(1)[0] { // Func Ident LeftParen?
+        &mut [Tok::Equality] => {
+            self.consume(1);
+            self.boolexp()?;
+
+        },
+        &mut [Tok::NotEqual] => {
+            self.consume(1);
+            self.boolexp()?;
+
         },
         _ => {
-            self.problem = Some(format!("Parsing Error: Function").into());
+            self.problem = Some(format!("Parsing Error: exp").into());
             return None;
         },
     };
