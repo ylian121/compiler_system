@@ -206,10 +206,38 @@ fn stmt(&mut self) -> Option<()> {
 // | exp
 // | exp Comma args
 
+fn args(&mut self) -> Option<()> {
+    self.exp()?;
+        loop {
+
+            if let Tok::Comma = self.tokens(1)[0] { // what if ')'?
+                self.consume(1);
+                self.args()?;
+            }
+            
+            
+        };
+
+}
+
 // exp: exp Equality boolexp
 // | exp NotEqual boolexp
 // | boolexp
 
+fn exp(&mut self) -> Option<()> {
+    self.exp()
+    match self.tokens(3) { // Func Ident LeftParen?
+        &mut [Tok::Function, Tok::Ident(ref mut id), Tok::LeftParen] => {
+            let name = std::mem::take(id);
+            self.consume(3); // we matched 3 tokens, no need for them anymore
+            name
+        },
+        _ => {
+            self.problem = Some(format!("Parsing Error: Function").into());
+            return None;
+        },
+    };
+}
 // boolexp: boolexp Less addexp
 //    | boolexp LessEqual addexp
 //    | boolexp Greater addexp
