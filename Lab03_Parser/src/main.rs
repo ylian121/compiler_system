@@ -164,6 +164,53 @@ impl Par {
     }
 
 
+// stmt: Int LeftBracket Num RightBracket Ident Semicolon
+// | Int Ident Semicolon
+// | Int Ident Assign exp Semicolon
+// | Ident Assign exp Semicolon
+// | Ident LeftBracket exp RightBracket Assign exp Semicolon
+// | While bool_exp block Semicolon
+// | If bool_exp block
+// | If bool_exp block Else bool_exp block
+// | Print LeftParen exp RightParen Semicolon
+// | Read LeftParen Ident RightParen Semicolon
+// | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
+// | Return Semicolon
+// | Return exp Semicolon
+// | Break Semicolon
+// | Continue Semicolon
+
+// args:
+// | exp
+// | exp Comma args
+
+// exp: exp Equality boolexp
+// | exp NotEqual boolexp
+// | boolexp
+
+// boolexp: boolexp Less addexp
+//    | boolexp LessEqual addexp
+//    | boolexp Greater addexp
+//    | boolexp GreaterEqual addexp
+//    | addexp
+
+// addexp: addexp Plus multexp
+//   | addexp Substract multexp
+//   | multexp
+
+// multexp: multexp Multiply numexp
+//    | multexp Divide numexp
+//    | multexp Modulus numexp
+//    | baseexp
+
+// baseexp: Num
+//    | Ident
+//    | Ident LeftBracket exp RightBracket
+//    | Ident LeftParen args RightBracket
+//    | LeftParen exp RightParen
+
+
+
 
 
 
