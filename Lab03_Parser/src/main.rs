@@ -137,8 +137,6 @@ impl Par {
 
     // block: LeftCurly stmts RightCurly
 
-    // stmts: 
-    //     | stmt stmts
     fn block(&mut self) -> Option<()> {{
         if let Tok::LeftCurly = self.tokens(1)[0]
                 self.consume(1);
@@ -195,13 +193,13 @@ fn stmt(&mut self) -> Option<()> {
             name
         },
 
-        &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Semicolon] => {
+        &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Semicolon, _, _, _, _,_] => {
             let name = std::mem::take(id);
             self.consume(3);
             name
         },
 
-        &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Assign] => {
+        &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Assign, _, _, _, _,_] => {
             let name = std::mem::take(id);
             self.consume(3);
             name
@@ -212,9 +210,9 @@ fn stmt(&mut self) -> Option<()> {
 
         },
 
-        &mut [Tok::Ident(ref mut id), Tok::Assign] => {
+        &mut [Tok::Ident(ref mut id), Tok::Assign, _, _, _, _, _, _] => {
             let name = std::mem::take(id);
-            self.consume(3);
+            self.consume(2);
             name
             self.exp()?;
             if let Tok::Semicolon = self.tokens(1)[0]
@@ -224,7 +222,7 @@ fn stmt(&mut self) -> Option<()> {
         },
 
         // | Ident LeftBracket exp RightBracket Assign exp Semicolon
-        &mut [Tok::Ident(ref mut id), Tok::LeftBracket] => {
+        &mut [Tok::Ident(ref mut id), Tok::LeftBracket, _, _, _, _, _, _] => {
             let name = std::mem::take(id);
             self.consume(2);
             name
@@ -243,7 +241,7 @@ fn stmt(&mut self) -> Option<()> {
         },
 
         // | While bool_exp block Semicolon
-        &mut [Tok::While] => {
+        &mut [Tok::While, _, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(1);
             // name
@@ -255,7 +253,7 @@ fn stmt(&mut self) -> Option<()> {
 
         },
 // | If bool_exp block
-        &mut [Tok::If] => {
+        &mut [Tok::If, _, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(1);
             // name
@@ -267,7 +265,7 @@ fn stmt(&mut self) -> Option<()> {
 
         },
 // | If bool_exp block Else bool_exp block
-        &mut [Tok::If] => {
+        &mut [Tok::If, _, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(1);
             // name
@@ -282,7 +280,7 @@ fn stmt(&mut self) -> Option<()> {
 
         },
 // | Print LeftParen exp RightParen Semicolon
-        &mut [Tok::Print,Tok::LeftParen] => {
+        &mut [Tok::Print,Tok::LeftParen, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(2);
             // name
@@ -298,14 +296,14 @@ fn stmt(&mut self) -> Option<()> {
 
         },
 // | Read LeftParen Ident RightParen Semicolon
-        &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::RightParen, Tok::Semicolon] => {
+        &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::RightParen, Tok::Semicolon, _, _, _] => {
             let name = std::mem::take(id);
             self.consume(5);
             name
 
         },
 // | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
-        &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::LeftBracket] => {
+        &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::LeftBracket, _, _, _, _] => {
             let name = std::mem::take(id);
             self.consume(4);
             name
@@ -321,7 +319,7 @@ fn stmt(&mut self) -> Option<()> {
         },
 
 
-        &mut [Tok::Return, Tok::Semicolon] => {
+        &mut [Tok::Return, Tok::Semicolon, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(2);
             // name
@@ -330,7 +328,7 @@ fn stmt(&mut self) -> Option<()> {
 
         // | Return exp Semicolon
 
-        &mut [Tok::Return] => {
+        &mut [Tok::Return, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(1);
             // name
@@ -341,14 +339,14 @@ fn stmt(&mut self) -> Option<()> {
 
         },
 
-        &mut [Tok::Break, Tok::Semicolon] => {
+        &mut [Tok::Break, Tok::Semicolon, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(2);
             // name
 
         },
 
-        &mut [Tok::Continue, Tok::Semicolon] => {
+        &mut [Tok::Continue, Tok::Semicolon, _, _, _, _, _, _] => {
             // let name = std::mem::take(id);
             self.consume(2);
             // name
@@ -360,13 +358,7 @@ fn stmt(&mut self) -> Option<()> {
             return None;
         }
     }
-// | While bool_exp block Semicolon
-// | If bool_exp block
-// | If bool_exp block Else bool_exp block
-// | Print LeftParen exp RightParen Semicolon
-// | Read LeftParen Ident RightParen Semicolon
-// | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
-// | Return exp Semicolon
+
 
 ///////
     // let name = match self.tokens(6) { 
@@ -528,6 +520,7 @@ fn exp(&mut self) -> Option<()> {
 //    | boolexp Greater addexp
 //    | boolexp GreaterEqual addexp
 //    | addexp
+
 
 // addexp: addexp Plus multexp
 //   | addexp Substract multexp
