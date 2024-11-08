@@ -1,3 +1,132 @@
+// TODO01: create Par struct
+// TODO02: create Par impl and its functions
+// TODO03: move lexing procedure to par's fn make()
+// TODO04: modify main function to call parser instead of lexer
+// TODO05: deal with temp values in expressions function
+// TODO06: Add the rest of the grammar rules into the parser impl
+
+use std::iter::Peekable;
+use std::vec;
+use std::error::Error;
+use slice_deque::SliceDeque;
+// use std::env;
+
+struct Par {
+    lex: Lex, // generate token
+    toks: SliceDeque<Tok>, // buffers tokens
+    problem: Option<Box<dyn Error>>,
+    // temp names --V
+    t_count: usize,
+    l_count: usize,
+}
+
+impl Par {
+    fn make(file_path: &str) -> Result<Par, Box<dyn Error>> {
+        Ok(Par{
+            lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
+            t_count: 0, l_count: 0,
+        })
+    }
+    fn tokens(&mut self, amt: usize) -> &mut [Tok] { // buffers token
+
+        while self.toks.len() < amt {self.toks.push_back(self.lex.next());}
+
+        &mut self.toks[0..amt]
+    }
+
+    fn consume (&mut self, amt: usize) {for _ in 0..amt {self.toks.pop_front();}} // reduce/consume tokens
+
+    fn temp_name(&mut self) -> Vec<u8> { // deals with naming temporary values
+        let mut res = Vec::from(b"temp");
+        res.extend_from_slice(&self.l_count.to_string().into_bytes());
+        self.t_count += 1;
+        res
+    }
+
+    fn temp_label(&mut self) -> Vec<u8> { // helps label temporary names
+        let mut res = Vec::from(b"label");
+        res.extend_from_slice(&self.l_count.to_string().into_bytes());
+        self.l_count += 1;
+        res
+    }
+    // TODO: Grammar stuff starts here ------------------------------------------------------------------------------
+    // prog:
+    // | func prog
+    fn parse(&mut self) -> Option<()> {
+        match self.tokens(1) {
+            &mut [Tok::Function] => {self.func()},
+            &mut [Tok::Empty] => {None},
+            _ => {self.problem = Some(format!("Parsing Error: program").into()); None},
+        }
+    }
+
+    // func: Func Ident LeftParen param_list RightParen block
+    // param_list:
+    //           | params
+    // params: Int Ident Comma params
+    //       | Int Ident
+    fn func(&mut self) -> Option<()> {
+        let name = match self.tokens(3) { // Func Ident LeftParen?
+            &mut [Tok::Function, Tok::Ident(ref mut id), Tok::LeftParen] => {
+                let name = std::mem::take(id);
+                self.consume(3); // we matched 3 tokens, no need for them anymore
+                name
+            },
+            _ => {
+                self.problem = Some(format!("Parsing Error: Function").into());
+                return None;
+            },
+        };
+
+        print!("function header: {}", String::from_utf8_lossy(&name)); // output function header
+
+        loop {
+            match self.tokens(1) { // is it 'int' or ')'?
+                &mut [Tok::Int] => {
+                    self.consume(1);
+
+                    // can we have nested match?
+                    match self.tokens(1) {
+                        &mut [Tok::Ident(ref mut id)] => {
+                            let arg = std::mem::take(id);
+                            self.consume(1);
+
+                            print!("{}", String::from_utf8_lossy(&arg));
+                        }
+                        _ => {
+                            self.problem = Some(format!("Error: Function Parameter Name").into());
+                            return None;
+                        }
+                    }
+
+                }
+
+                &mut [Tok::Comma] => { // technically this makes our program accept func name(int a, int b, ,,,) {} TODO: find something better
+                    self.consume(1);
+
+                    print!(" ,");
+                }
+
+                &mut [Tok::RightParen] =>
+
+
+
+                _ => {
+                    self.problem = Some(format!("Error: Function Parameter").into());
+                    return None;
+                }
+            }
+        }
+
+    }
+
+
+
+
+
+}
+
+
 use std::iter::Peekable;
 use std::vec;
 use std::error::Error;
