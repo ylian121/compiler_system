@@ -59,6 +59,17 @@ impl Par {
             _ => {self.problem = Some(format!("Parsing Error: program").into()); None},
         }
     }
+    
+    fn expect (&mut self, t:Tok) -> Option<()> { // helper function thanks to Josue
+        if std::mem::discriminant(&t) == std::mem::discriminant(&self.tokens(1)[0]){
+            self.consume(1);
+            return Some(());
+        } else {
+            self.problem = Some(format!("Parsing Error: Expected {:?}...", t).into());
+            return None;
+        }
+        
+    }
 
     // func: Func Ident LeftParen param_list RightParen block
     // param_list:
@@ -77,48 +88,81 @@ impl Par {
                 return None;
             },
         };
-
+        
         print!("function header: {}", String::from_utf8_lossy(&name)); // output function header
+        
+        let mut first = true;
+
 
         loop {
-            match self.tokens(1) { // is it 'int' or ')'?
-                &mut [Tok::Int] => {
-                    self.consume(1);
 
-                    // can we have nested match?
-                    match self.tokens(1) {
-                        &mut [Tok::Ident(ref mut id)] => {
-                            let arg = std::mem::take(id);
-                            self.consume(1);
-
-                            print!("{}", String::from_utf8_lossy(&arg));
-                        }
-                        _ => {
-                            self.problem = Some(format!("Error: Function Parameter Name").into());
-                            return None;
-                        }
-                    }
-
-                }
-
-                &mut [Tok::Comma] => { // technically this makes our program accept func name(int a, int b, ,,,) {} TODO: find something better
-                    self.consume(1);
-
-                    print!(" ,");
-                }
-
-                &mut [Tok::RightParen] =>
-
-
-
-                _ => {
-                    self.problem = Some(format!("Error: Function Parameter").into());
-                    return None;
-                }
+            if let Tok::RightParen = self.tokens(1)[0] { // what if ')'?
+                self.consume(1);
+                print!("\n"); // finished reading params, newline
+                break;
             }
+            if !first{
+                self.expect(Tok::Comma)?; // remember '?'
+                // if let Tok::Comma = self.tokens(1)[0] { // what if 'int'?
+                //     self.consume(1);
+                // } else {
+                //     self.problem = Some(format!("Parsing Error: Expected Comma...").into());
+                //     return None;
+                // }
+            }
+            self.expect(Tok::Int)?;
+            // if let Tok::Int = self.tokens(1)[0] { // what if 'int'?
+            //     self.consume(1);
+            // } else {
+            //     self.problem = Some(format!("Parsing Error: Expected int...").into());
+            //     return None;
+            // }
+            if let Tok::Ident(ref mut id) = self.tokens(1)[0] { // what if 'int'?
+                let arg = std::mem::take(id);
+                self.consume(1);
+
+                print!("{} ", String::from_utf8_lossy(&arg));
+            } else {
+                self.problem = Some(format!("Parsing Error: Expected int...").into());
+                return None;
+            }
+            
+            first = false;
+            
         }
 
+        // TODOTODO NEED TO CONTINUE WITH func
+        self.block();
     }
+
+    // block: LeftCurly stmts RightCurly
+
+    // stmts: 
+    //     | stmt stmts
+    fn block(&mut self) -> Option<()> {{
+        if let Tok::LeftCurly = self.tokens(1)[0]
+                self.consume(1);
+            },
+            _ => {
+                self.problem = Some(format!("Parsing Error: block").into());
+                return None;
+            },
+        };
+
+
+        loop {
+
+            if let Tok::RightCurly = self.tokens(1)[0] { // what if ')'?
+                self.consume(1);
+                print!("\n"); // finished , newline
+                break;
+            }
+            
+            self.stmts()
+            
+        }
+    }
+
 
 
 
