@@ -554,6 +554,8 @@ fn boolexp(&mut self) -> Option<()> {
 //   | addexp Substract multexp
 //   | multexp
 
+
+
 // multexp: multexp Multiply numexp
 //    | multexp Divide numexp
 //    | multexp Modulus numexp
@@ -564,9 +566,52 @@ fn boolexp(&mut self) -> Option<()> {
 //    | Ident LeftBracket exp RightBracket
 //    | Ident LeftParen args RightBracket
 //    | LeftParen exp RightParen
+fn baseexp(&mut self) -> Option<()> {
+    match self.peek_many(4){
+        &mut [Tok::Num(ref mut num) _, _,_] => {
+            let size = std::mem::take(num)
+            self.consume(1);
+            size
+        },
 
+        &mut [Tok::Ident(ref mut id), _, _,_] => {
+            let name = std::mem::take(id);
+            // let size = std::mem::take(num)
+            self.consume(1);
+            name
+        },
 
+        &mut [Tok::Ident(ref mut id), Tok::LeftBracket, _, _] => {
+            let name = std::mem::take(id);
+            self.consume(2);
+            name
+            self.exp()?;
+            if let Tok::RightBracket = self.tokens(1)[0]
+                self.consume(1);
+            },
+        },
 
+        &mut [Tok::Ident(ref mut id), Tok::LeftBracket, _, _] => {
+            let name = std::mem::take(id);
+            self.consume(2);
+            name
+            self.args()?;
+            if let Tok::RightBracket = self.tokens(1)[0]
+                self.consume(1);
+            },
+        },
+
+        &mut [Tok::LeftParen,_ ,_, _] => {
+            // let name = std::mem::take(id);
+            self.consume(1);
+            // name
+            self.exp()?;
+            if let Tok::RightParen = self.tokens(1)[0]
+                self.consume(1);
+            },
+        },
+
+    }
 
 
 
