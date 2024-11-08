@@ -180,6 +180,28 @@ impl Par {
 // | Break Semicolon
 // | Continue Semicolon
 
+fn stmt(&mut self) -> Option<()> {
+    match self.tokens(1)[0] {
+        // &mut [Tok::Function] => {self.func()},
+        &mut [Tok::Return] => {
+            self.consume(1);
+            self.expect(Tok::Semicolon)?;
+
+        },
+        &mut [Tok::Break] => {
+            self.consume(1);
+            self.expect(Tok::Semicolon)?;
+
+        },
+        &mut [Tok::Continue] => {
+            self.consume(1);
+            self.expect(Tok::Semicolon)?;
+
+        },
+        _ => {self.problem = Some(format!("Parsing Error: stmt").into()); None},
+    }
+}
+
 // args:
 // | exp
 // | exp Comma args
