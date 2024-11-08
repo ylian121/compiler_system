@@ -578,6 +578,25 @@ fn addexpr(&mut self) -> Option<()> {
 //    | multexp Divide numexp
 //    | multexp Modulus numexp
 //    | baseexp
+fn mulexpr(&mut self) -> Option<()> {
+    let mut lhs = self.mulexpr()?;
+    
+    loop {
+        match *lex{
+            b'*' | b'/' | b'%' => {
+                let op = *lex;
+                // lex = lex.add(1); 
+                let rhs = self.baseexp()?;
+                let temp = temp_name();
+                
+                // emit::bin_op(op, &temp, &lhs, &rhs); 
+                // do print instead
+                lhs = temp;
+            },
+            _ => return lhs,
+        }
+    }
+}
 
 // baseexp: Num
 //    | Ident
