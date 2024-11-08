@@ -163,6 +163,12 @@ impl Par {
         }
     }
 
+    // stmts: 
+    //     | stmt stmts
+    fn stmts(&mut self) -> Option<()> {{
+        self.stmt()?;
+    }
+
 
 // stmt: Int LeftBracket Num RightBracket Ident Semicolon
 // | Int Ident Semicolon
@@ -181,25 +187,109 @@ impl Par {
 // | Continue Semicolon
 
 fn stmt(&mut self) -> Option<()> {
-    match self.tokens(1)[0] {
-        // &mut [Tok::Function] => {self.func()},
-        &mut [Tok::Return] => {
-            self.consume(1);
-            self.expect(Tok::Semicolon)?;
+    let name = match self.tokens(6) { 
+        &mut [Tok::Int, Tok::LeftBracket, Tok::Num, Tok::RightBracket, Tok::Ident(ref mut id), Tok::Semicolon] => {
+            let name = std::mem::take(id);
+            self.consume(6);
+            name
+        },
+    };
+
+    let name = match self.tokens(3) { 
+        &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Semicolon] => {
+            let name = std::mem::take(id);
+            self.consume(3);
+            name
+        },
+    };
+
+    let name = match self.tokens(3) { 
+        &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Assign] => {
+            let name = std::mem::take(id);
+            self.consume(3);
+            name
+            self.exp()?;
+            if let Tok::Semicolon = self.tokens(1)[0]
+                self.consume(1);
+            },
 
         },
-        &mut [Tok::Break] => {
-            self.consume(1);
-            self.expect(Tok::Semicolon)?;
+    };
+
+    let name = match self.tokens(2) { 
+        &mut [Tok::Ident(ref mut id), Tok::Assign] => {
+            let name = std::mem::take(id);
+            self.consume(3);
+            name
+            self.exp()?;
+            if let Tok::Semicolon = self.tokens(1)[0]
+                self.consume(1);
+            },
 
         },
-        &mut [Tok::Continue] => {
-            self.consume(1);
-            self.expect(Tok::Semicolon)?;
+    };
+
+
+    let name = match self.tokens(2) { 
+        &mut [Tok::Return, Tok::Semicolon] => {
+            let name = std::mem::take(id);
+            self.consume(2);
+            name
 
         },
-        _ => {self.problem = Some(format!("Parsing Error: stmt").into()); None},
+    };
+
+    let name = match self.tokens(2) { 
+        &mut [Tok::Break, Tok::Semicolon] => {
+            let name = std::mem::take(id);
+            self.consume(2);
+            name
+
+        },
+    };
+
+    let name = match self.tokens(2) { 
+        &mut [Tok::Continue, Tok::Semicolon] => {
+            let name = std::mem::take(id);
+            self.consume(2);
+            name
+
+        },
+    };
+
+// | Ident LeftBracket exp RightBracket Assign exp Semicolon
+// | While bool_exp block Semicolon
+// | If bool_exp block
+// | If bool_exp block Else bool_exp block
+// | Print LeftParen exp RightParen Semicolon
+// | Read LeftParen Ident RightParen Semicolon
+// | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
+// | Return exp Semicolon
+
+
+    _ => {
+        self.problem = Some(format!("Parsing Error: stmt").into());
+        return None;
     }
+    // match self.tokens(1)[0] {
+    //     // &mut [Tok::Function] => {self.func()},
+    //     &mut [Tok::Return] => {
+    //         self.consume(1);
+    //         self.expect(Tok::Semicolon)?;
+
+    //     },
+    //     &mut [Tok::Break] => {
+    //         self.consume(1);
+    //         self.expect(Tok::Semicolon)?;
+
+    //     },
+    //     &mut [Tok::Continue] => {
+    //         self.consume(1);
+    //         self.expect(Tok::Semicolon)?;
+
+    //     },
+    //     _ => {self.problem = Some(format!("Parsing Error: stmt").into()); None},
+    // }
 }
 
 // args:
@@ -270,7 +360,6 @@ fn exp(&mut self) -> Option<()> {
 
 
 
-}
 
 
 use std::iter::Peekable;
