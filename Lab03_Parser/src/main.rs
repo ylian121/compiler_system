@@ -520,7 +520,35 @@ fn exp(&mut self) -> Option<()> {
 //    | boolexp Greater addexp
 //    | boolexp GreaterEqual addexp
 //    | addexp
+fn boolexp(&mut self) -> Option<()> {
+    self.addexp()?;
+    match self.tokens(1)[0] { 
+        &mut [Tok::Less] => {
+            self.consume(1);
+            self.addexp()?;
 
+        },
+        &mut [Tok::LessEqual] => {
+            self.consume(1);
+            self.addexp()?;
+
+        },
+        &mut [Tok::Greater] => {
+            self.consume(1);
+            self.addexp()?;
+
+        },
+        &mut [Tok::GreaterEqual] => {
+            self.consume(1);
+            self.addexp()?;
+
+        },
+        _ => {
+            self.problem = Some(format!("Parsing Error: boolexp").into());
+            return None;
+        },
+    };
+}
 
 // addexp: addexp Plus multexp
 //   | addexp Substract multexp
