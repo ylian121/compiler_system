@@ -553,7 +553,25 @@ fn boolexp(&mut self) -> Option<()> {
 // addexp: addexp Plus multexp
 //   | addexp Substract multexp
 //   | multexp
-
+fn addexpr(&mut self) -> Option<()> {
+    let mut lhs = self.mulexpr()?;
+    
+    loop {
+        match *lex{
+            b'+' | b'-' => {
+                let op = *lex;
+                lex = lex.add(1); 
+                let rhs = self.mulexpr()?;
+                let temp = temp_name();
+                
+                // emit::bin_op(op, &temp, &lhs, &rhs); 
+                // do print instead
+                lhs = temp;
+            },
+            _ => return lhs,
+        }
+    }
+}
 
 
 // multexp: multexp Multiply numexp
