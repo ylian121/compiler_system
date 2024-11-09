@@ -70,8 +70,16 @@ impl Par {
         }
         
     }
-
-    fn binOp (&mut self, op:Tok, temp:u8, lhs:u8, rhs) ->  /////////////////////////
+    // TODOTODOTODO: YOU LEFT HERE
+    fn binOP (&mut self, op:Tok, lhs:Vec<u8>, rhs:Vec<u8>) -> Option<Vec<u8>> {
+        if let Tok::Multiply = op {
+            let dst = self.temp_name();
+            println!("{} = {} * {}", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs), String::from_utf8_lossy(&rhs));
+            Some(dst)
+        } else {
+            self.problem = Some(format!("Binary Operation Error").into()); None
+        }
+    }
 
 
 
@@ -419,23 +427,30 @@ impl Par {
     //        | multexp Divide baseexp
     //        | multexp Modulus baseexp
     //        | baseexp
-    fn mult_exp->(&mut self) -> Option<Vec<u8>> {
+    fn mult_exp(&mut self) -> Option<Vec<u8>> {
         let lhs_val = self.base_exp()?;
         
         loop {
             if let Tok::Multiply = self.tokens(1)[0] {
                 self.consume(1);
-                /// sth sth
+                // let op = Tok::Multiply;
+                let rhs = self.base_exp()?;
+                // call lhs = binOP
             }
             else if let Tok::Divide = self.tokens(1)[0] {
                 self.consume(1);
-                /// sth sth
+                // let op = Tok::Divide;
+                let rhs = self.base_exp()?;
+                // call lhs = binOP
             }
             else if let Tok::Modulus = self.tokens(1)[0] {
                 self.consume(1);
-                /// sth sth
+                // let op = Tok::Modulus;
+                let rhs = self.base_exp()?;
+                // call lhs = binOP
+                
             } else {
-                /// what to do? //you left here
+                // what to do? //you left here
             }
         }
 
