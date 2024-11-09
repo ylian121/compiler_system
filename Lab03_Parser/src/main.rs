@@ -132,7 +132,7 @@ impl Par {
         }
 
         // continue with statements block
-        self.stmts();
+        self.stmts()?;
     }
 
 
@@ -155,30 +155,85 @@ impl Par {
                 break Some(());
             }
             //if it wasn't a '}'... well then it's something else
-            self.stmt()?; // TODOTODO: You left here
+            self.stmt()?;
         }
     }
 
     // stmt: Int LeftBracket Num RightBracket Ident Semicolon //DONE
     //     | Int Ident Semicolon //DONE
-    //     | Int Ident Assign exp Semicolon
-    //     | Ident Assign exp Semicolon
-    //     | Ident LeftBracket exp RightBracket Assign exp Semicolon
-    //     | While bool_exp block Semicolon
+    //     | Int Ident Assign exp Semicolon //DONE-NEED fn exp()
+    //     | Ident Assign exp Semicolon //DONE-NEED fn exp()
+    //     | Ident LeftBracket exp RightBracket Assign exp Semicolon //DONE-NEED fn exp()
+    //     | While bool_exp block //DONE-NEED fn exp()
     //     | If bool_exp block
     //     | If bool_exp block Else bool_exp block
-    //     | Print LeftParen exp RightParen Semicolon
-    //     | Read LeftParen Ident RightParen Semicolon
-    //     | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
+    //     | Print LeftParen exp RightParen Semicolon //DONE-NEED fn exp()
+    //     | Read LeftParen Ident RightParen Semicolon //DONE
+    //     | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon //DONE-NEED fn exp()
     //     | Return Semicolon //DONE
-    //     | Return exp Semicolon
+    //     | Return exp Semicolon //DONE-NEED fn exp()
     //     | Break Semicolon //DONE
     //     | Continue Semicolon //DONE
+    
     // the possible derivations are not ordered in fn stmt...
     fn stmt(&mut self) -> Option<()> {
         match self.tokens(6) { // we're looking at 6 tokens in advance
+            
+            // if is special, since one derivation is ambiguous so we just make a function for it
+            &mut[Tok::If, _, _, _, _, _, ] => {
+                self.if_block()?
+            }
 
-            // TODO: YOU LEFT HERE
+
+            // While bool_exp block
+            &mut[Tok::While, _, _, _, _, _, ] => {
+                self.consume(1);
+                print!("while (");
+                if let Some(cond) = self.bool_exp()? {
+                    println!("cond({}))", String::from_utf8_lossy(&cond));
+                    self.stmts()
+                } else { None }
+            }
+
+            &mut [Tok::Ident(ref mut id), Tok::Assign, _, _, _, _, ] => {
+                let name = std::mem::take(id);
+                self.consume(2);
+
+                if let Some(rhs)= self.exp()? {
+                    println!("assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
+                    Some(())
+                } else { None }
+            }
+
+            // Ident LeftBracket exp RightBracket Assign exp Semicolon
+            &mut [Tok::Ident(ref mut id), Tok::LeftBracket , _, _, _, _,] => {
+                let name = std::mem::take(id);
+                self.consume(2);
+
+                if let Some(index)= self.exp()? { // NESTED IF KEEP AN EYE
+                    self.expect(Tok::RightBracket)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
+                    self.expect(Tok::Assign)?;
+
+                    if let Some(rhs)= self.exp()? {
+                        println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
+
+                        self.expect(Tok::Semicolon);
+                        Some(())
+                    } else {None}
+                } else { None }
+            }
+
+            &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Assign, _, _, _, ] => {
+                let name = std::mem::take(id);
+                self.consume(3);
+
+                if let Some(rhs)= self.exp()? {
+                    println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
+                    Some(())
+                } else { None }
+            }
 
             &mut [Tok::Int, Tok::LeftBracket, Tok::Num(ref mut num), Tok::RightBracket, Tok::Ident(ref mut id), Tok::Semicolon] => {
                 let length = std::mem::take(num);
@@ -195,12 +250,59 @@ impl Par {
                 Some(())
             }
 
+            // Print LeftParen exp RightParen Semicolon
+            &mut [Tok::Print, Tok::LeftParen, _, _, _, _, ] => {
+                self.consume(2);
+
+                if let Some(value)= self.exp()? {
+                    println!("print: {}", String::from_utf8_lossy(&value));
+                    self.expect(Tok::RightParen)?;
+                    self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
+                    Some(())
+                } else { None }
+
+            }
+
+            // Read LeftParen Ident RightParen Semicolon
+            &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::RightParen, Tok::Semicolon, _,] => {
+                let name = std::mem::take(id);
+                self.consume(5);
+                println!("read: {}", String::from_utf8_lossy(&id));
+                Some(())
+            }
+
+            // Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
+            &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::LeftBracket, _, _,] => {
+                let name = std::mem::take(id);
+                self.consume(4);
+
+                if let Some(index)= self.exp()? {
+                    println!("read: {}[{}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    self.expect(Tok::RightBracket)?;
+                    self.expect(Tok::RightParen)?;
+                    self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
+                    Some(())
+                } else { None }
+            }
+
+            
             &mut [Tok::Return, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
                 println!("return");
                 Some(())
             }
+            // Return exp Semicolon
+            // slides say ordering matter, so we can put the more ambiguous one at the bottom of the specific derivation then
+            &mut [Tok::Return, _, _, _, _, _, ] => {
+                self.consume(1);
+                if let Some(value) = self.exp()? {
+                    println!("return: {}", String::from_utf8_lossy(&value));
+                    self.expect(Tok::Semicolon)?;
+                    Some(())
+                } else { None }
+            }
 
+            
             &mut [Tok::Break, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
                 println!("break");
@@ -217,7 +319,51 @@ impl Par {
         }
     }
 
+    // If bool_exp block
+    // If bool_exp block Else bool_exp block
+    fn if_block(&mut self) -> Option<()> {
+        self.consume(1);
+        print!("if(");
 
+        if let Some(cond) = self.bool_exp()? {
+            println!("cond({})", String::from_utf8_lossy(&cond));
+
+            self.stmts()?;
+
+            match self.tokens(1) {
+                &mut [Tok::Else] => {
+                    self.consume(1);
+                    println!("else");
+                    self.stmts()?;
+                },
+                _ => {},
+            }
+
+            Some(())
+        }
+        else { None }
+    }
+
+    // baseexp: Num
+    //        | Ident
+    //        | Ident LeftBracket exp RightBracket
+    //        | Ident LeftParen args RightBracket
+    //        | LeftParen exp RightParen
+    fn base_exp(&mut self) -> Option<Vec<u8>> {
+        match self.tokens(2) {
+
+            &mut[Tok::Num(ref mut num), _, ] => {
+                let number = std::mem::take(num);
+                self.consume(1);
+                Some(number)
+            },
+
+            &mut[Tok::Ident(ref mut id), Tok::LeftParen] => {
+                self.consume(2);
+                // TODOTODOTODO: YOU LEFT HERE
+            }
+        }
+    }
 
 
 
