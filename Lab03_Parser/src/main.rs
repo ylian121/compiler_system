@@ -89,7 +89,7 @@ impl Par {
             },
         };
         
-        print!("function header: {}", String::from_utf8_lossy(&name)); // output function header
+        print!("function header: {} ", String::from_utf8_lossy(&name)); // output function header
         
         let mut first = true;
 
@@ -121,7 +121,7 @@ impl Par {
                 let arg = std::mem::take(id);
                 self.consume(1);
 
-                print!("{} ", String::from_utf8_lossy(&arg));
+                print!(",{} ", String::from_utf8_lossy(&arg));
             } else {
                 self.problem = Some(format!("Parsing Error: Expected int...").into());
                 return None;
@@ -131,8 +131,90 @@ impl Par {
             
         }
 
-        // TODOTODO NEED TO CONTINUE WITH func
-        self.block();
+        // continue with statements block
+        self.stmts();
+    }
+
+
+    // block: LeftCurly stmts RightCurly
+    // stmts: 
+    //      | stmt stmts
+    fn stmts(&mut self) -> Option<()> {
+        match self.tokens(1) {
+            &mut [Tok::LeftCurly] => {
+                self.consume(1);
+                println!("{{");
+            },
+            _ => {self.problem = Some(format!("Parsing Error: Expected statements block").into()); return None;},
+        }
+        
+        loop {
+            if let Tok::RightCurly = self.tokens(1)[0] {
+                self.consume(1);
+                println!("}}\n");
+                break Some(());
+            }
+            //if it wasn't a '}'... well then it's something else
+            self.stmt()?; // TODOTODO: You left here
+        }
+    }
+
+    // stmt: Int LeftBracket Num RightBracket Ident Semicolon //DONE
+    //     | Int Ident Semicolon //DONE
+    //     | Int Ident Assign exp Semicolon
+    //     | Ident Assign exp Semicolon
+    //     | Ident LeftBracket exp RightBracket Assign exp Semicolon
+    //     | While bool_exp block Semicolon
+    //     | If bool_exp block
+    //     | If bool_exp block Else bool_exp block
+    //     | Print LeftParen exp RightParen Semicolon
+    //     | Read LeftParen Ident RightParen Semicolon
+    //     | Read LeftParen Ident LeftBracket exp RightBracket RightParen Semicolon
+    //     | Return Semicolon //DONE
+    //     | Return exp Semicolon
+    //     | Break Semicolon //DONE
+    //     | Continue Semicolon //DONE
+    // the possible derivations are not ordered in fn stmt...
+    fn stmt(&mut self) -> Option<()> {
+        match self.tokens(6) { // we're looking at 6 tokens in advance
+
+            // TODO: YOU LEFT HERE
+
+            &mut [Tok::Int, Tok::LeftBracket, Tok::Num(ref mut num), Tok::RightBracket, Tok::Ident(ref mut id), Tok::Semicolon] => {
+                let length = std::mem::take(num);
+                let name = std::mem::take(id);
+                self.consume(6);
+                println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
+                Some(())
+            }
+
+            &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Semicolon, _, _, _, ] => {
+                let name = std::mem::take(id);
+                self.consume(3);
+                println!("declare var: {}", String::from_utf8_lossy(&name));
+                Some(())
+            }
+
+            &mut [Tok::Return, Tok::Semicolon, _, _, _, _, ] => {
+                self.consume(2);
+                println!("return");
+                Some(())
+            }
+
+            &mut [Tok::Break, Tok::Semicolon, _, _, _, _, ] => {
+                self.consume(2);
+                println!("break");
+                Some(())
+            }
+
+            &mut [Tok::Continue, Tok::Semicolon, _, _, _, _, ] => {
+                self.consume(2);
+                println!("continue");
+                Some(())
+            }
+
+            _ => {self.problem = Some(format!("Parsing error: statement formatting").into()); None}
+        }
     }
 
 
