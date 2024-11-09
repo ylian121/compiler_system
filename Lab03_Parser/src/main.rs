@@ -38,7 +38,7 @@ impl Par {
 
     fn temp_name(&mut self) -> Vec<u8> { // deals with naming temporary values
         let mut res = Vec::from(b"temp");
-        res.extend_from_slice(&self.l_count.to_string().into_bytes());
+        res.extend_from_slice(&self.t_count.to_string().into_bytes());
         self.t_count += 1;
         res
     }
@@ -70,6 +70,10 @@ impl Par {
         }
         
     }
+
+    fn binOp (&mut self, op:Tok, temp:u8, lhs:u8, rhs) ->  /////////////////////////
+
+
 
     // func: Func Ident LeftParen param_list RightParen block
     // param_list:
@@ -344,13 +348,26 @@ impl Par {
         else { None }
     }
 
-    // baseexp: Num
-    //        | Ident
-    //        | Ident LeftBracket exp RightBracket
-    //        | Ident LeftParen args RightBracket
-    //        | LeftParen exp RightParen
+    // baseexp: Num //DONE
+    //        | Ident //DONE
+    //        | Ident LeftBracket exp RightBracket //DONE-NEED fn exp()
+    //        | Ident LeftParen args RightBracket //DONE-NEED fn args()!!!!!!!!!!
+    //        | LeftParen exp RightParen //DONE-NEED fn exp()
     fn base_exp(&mut self) -> Option<Vec<u8>> {
         match self.tokens(2) {
+
+            &mut[Tok::LeftParen, _,] => {
+                self.consume(1);
+                let exp = self.exp()?;
+                if let Tok::RightParen = self.tokens(1)[0] {
+                    let dst = self.temp_name();
+                    println!("{} = ({})", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&exp));
+                    Some(dst)
+                } else {
+                    self.problem = Some(format!("(exp) format failed").into());
+                    None
+                }
+            }
 
             &mut[Tok::Num(ref mut num), _, ] => {
                 let number = std::mem::take(num);
@@ -358,13 +375,73 @@ impl Par {
                 Some(number)
             },
 
-            &mut[Tok::Ident(ref mut id), Tok::LeftParen] => {
+            &mut[Tok::Ident(ref mut id), Tok::LeftBracket] => {
+                let name = std::mem::take(id);
                 self.consume(2);
-                // TODOTODOTODO: YOU LEFT HERE
+                let index = self.exp()?;
+                if let Tok::RightBracket = self.tokens(1)[0] {
+                    let dst = self.temp_name();
+                    self.consume(1);
+                    println!("{} = {}[{}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    Some(dst)
+                } else {
+                    self.problem = Some(format!("array format failed").into());
+                    None
+                }
+                
+            },
+
+            &mut[Tok::Ident(ref mut id), Tok::LeftParen] => {
+                let name = std::mem::take(id);
+                let args = self.args()?;
+                if let Tok::RightParen = self.tokens(1)[0] {
+                    let dst = self.temp_name();
+                    self.consume(1);
+                    println!("{} = {}({})", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&args));
+                    Some(dst)
+                } else {
+                    self.problem = Some(format!("function call format failed").into());
+                    None
+                }
             }
+
+            &mut[Tok::Ident(ref mut id), _,] => {
+                let name = std::mem::take(id);
+                self.consume(1);
+                Some(name)
+            },
+
+            _ => {self.problem = Some(format!("Base expression error").into()); None}
         }
     }
 
+    // multexp: multexp Multiply baseexp
+    //        | multexp Divide baseexp
+    //        | multexp Modulus baseexp
+    //        | baseexp
+    fn mult_exp->(&mut self) -> Option<Vec<u8>> {
+        let lhs_val = self.base_exp()?;
+        
+        loop {
+            if let Tok::Multiply = self.tokens(1)[0] {
+                self.consume(1);
+                /// sth sth
+            }
+            else if let Tok::Divide = self.tokens(1)[0] {
+                self.consume(1);
+                /// sth sth
+            }
+            else if let Tok::Modulus = self.tokens(1)[0] {
+                self.consume(1);
+                /// sth sth
+            } else {
+                /// what to do? //you left here
+            }
+        }
+
+    }
+
+    
 
 
 
