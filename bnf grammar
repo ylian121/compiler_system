@@ -23,7 +23,7 @@ stmt: Int LeftBracket Num RightBracket Ident Semicolon
     | Int Ident Assign exp Semicolon
     | Ident Assign exp Semicolon
     | Ident LeftBracket exp RightBracket Assign exp Semicolon
-    | While bool_exp block Semicolon
+    | While bool_exp block
     | If bool_exp block
     | If bool_exp block Else bool_exp block
     | Print LeftParen exp RightParen Semicolon
@@ -52,9 +52,9 @@ addexp: addexp Plus multexp
       | addexp Substract multexp
       | multexp
 
-multexp: multexp Multiply numexp
-       | multexp Divide numexp
-       | multexp Modulus numexp
+multexp: multexp Multiply baseexp
+       | multexp Divide baseexp
+       | multexp Modulus baseexp
        | baseexp
 
 baseexp: Num
