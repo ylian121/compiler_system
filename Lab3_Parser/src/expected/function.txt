@@ -1,0 +1,22 @@
+function header: add, a, b
+{
+temp0 = a + b
+return: temp0
+}
+function header: mul, a, b
+{
+temp1 = a * b
+return: temp1
+}
+function header: main
+{
+declare var: a
+declare var: b
+call: temp2 = add(10, 2, )
+assign var: a = temp2
+print: a
+temp3 = a + b
+call: temp4 = mul(a, temp3, )
+assign var: b = temp4
+print: b
+}

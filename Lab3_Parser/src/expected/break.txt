@@ -1,0 +1,17 @@
+function header: main
+{
+declare var: i
+assign var: i = 0
+while(temp0 = i < 10
+ cond(temp0))
+{
+if(temp1 = i >= 4
+ cond(temp1))
+{
+break
+}
+print: i
+temp2 = i + 1
+assign var: i = temp2
+}
+}

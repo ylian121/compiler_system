@@ -1,0 +1,29 @@
+function header: main
+{
+declare var: a
+declare var: b
+declare var: c
+assign var: a = 100
+assign var: b = 50
+temp0 = a + b
+assign var: c = temp0
+print: c
+temp1 = a - b
+assign var: c = temp1
+print: c
+temp2 = a * b
+assign var: c = temp2
+print: c
+temp3 = a / b
+assign var: c = temp3
+print: c
+temp4 = a % b
+assign var: c = temp4
+print: c
+assign var: a = 4
+assign var: b = 7
+temp5 = a + 2
+temp6 = temp5 * b
+assign var: c = temp6
+print: c
+}
