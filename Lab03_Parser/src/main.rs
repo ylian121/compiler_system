@@ -590,7 +590,7 @@ impl Par {
             print!("{}", String::from_utf8_lossy(&arguments.remove(0)));
             argufirst = false
         }
-        println!(" )");
+        println!(")");
         Some(dst)
 
         // let dst = self.temp_name();
