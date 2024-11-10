@@ -636,29 +636,21 @@ enum Tok {
     Empty, // signals parser that no token would've been here
 }
 
-impl Par {
-    fn make(file_path: &str) -> Result<Par, Box<dyn Error>> {
-        Ok(Par{
-            lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
-            t_count: 0, l_count: 0,
+impl Lex {
+    fn make(file_path: &str) -> Result<Lex, Box<dyn Error>> {
+        Ok(Lex{
+            it:std::fs::read_to_string(file_path)?.into_bytes().into_iter().peekable(),
+            line:0,
+            problem:None,
         })
     }
-    fn tokens(&mut self, amt: usize) -> &mut [Tok] { // buffers token
+    // fn lex (&mut self) -> Option<Tok> {
+    //     let byte = self.it.peek()?;
+    //     self.it.next();
 
-        while self.toks.len() < amt {self.toks.push_back(self.lex.next());}
+    //     Some(Tok::Ass)
+    // }
 
-        &mut self.toks[0..amt]
-    }
-
-    fn consume (&mut self, amt: usize) {for _ in 0..amt {self.toks.pop_front();}} // reduce/consume tokens
-
-    fn temp_name(&mut self) -> Vec<u8> { // deals with naming temporary values
-        let mut res = Vec::from(b"temp");
-        res.extend_from_slice(&self.l_count.to_string().into_bytes());
-        self.t_count += 1;
-        res
-    }
-  
     fn next(&mut self) -> Tok { // NEW: We need this so that parser can call a function that returns a token
         if let Some(tok) = self.lex() {tok}
         else {Tok::Empty}
@@ -717,9 +709,7 @@ impl Par {
 
             ch => {self.problem = Some(format!("Lexer: found an invalid char {}", ch).into()); None}
         }
-        
     }
-
 
     fn lex_id (&mut self) -> Option<Tok> {
         // since we're already here, then the first character of 'it' must be b'A' ..=b'Z' | b'a' ..=b'z' | b'_'
@@ -732,38 +722,15 @@ impl Par {
                 },
                 _ => {break},
             }
-            if !first{
-                self.expect(Tok::Comma)?; // remember '?'
-                // if let Tok::Comma = self.tokens(1)[0] { // what if 'int'?
-                //     self.consume(1);
-                // } else {
-                //     self.problem = Some(format!("Parsing Error: Expected Comma...").into());
-                //     return None;
-                // }
-            }
-            self.expect(Tok::Int)?;
-            // if let Tok::Int = self.tokens(1)[0] { // what if 'int'?
-            //     self.consume(1);
-            // } else {
-            //     self.problem = Some(format!("Parsing Error: Expected int...").into());
-            //     return None;
-            // }
-            if let Tok::Ident(ref mut id) = self.tokens(1)[0] { // what if 'int'?
-                let arg = std::mem::take(id);
-                self.consume(1);
-
-                print!("{} ", String::from_utf8_lossy(&arg));
-            } else {
-                self.problem = Some(format!("Parsing Error: Expected int...").into());
-                return None;
-            }
-            
-            first = false;
-            
         }
 
-        // TODOTODO NEED TO CONTINUE WITH func
-        self.block();
+        Some(match &id[..] {
+            b"func" => {Tok::Function}, b"return" => {Tok::Return}, b"int" => {Tok::Int},
+            b"print" => {Tok::Print}, b"read" => {Tok::Read}, b"while" => {Tok::While},
+            b"if" => {Tok::If}, b"else" => {Tok::Else}, b"break" => {Tok::Break}, b"continue" => {Tok::Continue},
+            _ => {Tok::Ident(id)},
+        })
+
     }
 
     fn lex_num (&mut self) -> Option<Tok> {
@@ -776,18 +743,12 @@ impl Par {
                     self.it.next();
                 },
                 _ => {break},
-
             }
-            
-            self.stmts()
-            
         }
-    }
 
-    // stmts: 
-    //     | stmt stmts
-    fn stmts(&mut self) -> Option<()> {{
-        self.stmt()?;
+        Some(match &num[..] {
+            _ => {Tok::Num(num)},
+        })
     }
 
     fn lex_com (&mut self) {
@@ -797,219 +758,9 @@ impl Par {
         }
     }
 
-
-///////
-    // let name = match self.tokens(6) { 
-    //     &mut [Tok::Int, Tok::LeftBracket, Tok::Num, Tok::RightBracket, Tok::Ident(ref mut id), Tok::Semicolon] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(6);
-    //         name
-    //     },
-    // };
-
-    // let name = match self.tokens(3) { 
-    //     &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Semicolon] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(3);
-    //         name
-    //     },
-    // };
-
-    // let name = match self.tokens(3) { 
-    //     &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Assign] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(3);
-    //         name
-    //         self.exp()?;
-    //         if let Tok::Semicolon = self.tokens(1)[0]
-    //             self.consume(1);
-    //         },
-
-    //     },
-    // };
-
-    // let name = match self.tokens(2) { 
-    //     &mut [Tok::Ident(ref mut id), Tok::Assign] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(3);
-    //         name
-    //         self.exp()?;
-    //         if let Tok::Semicolon = self.tokens(1)[0]
-    //             self.consume(1);
-    //         },
-
-    //     },
-    // };
-
-    // let name = match self.tokens(1) { 
-    //     &mut [Tok::Return] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(1);
-    //         name
-
-    //     },
-    // };
-
-    // let name = match self.tokens(2) { 
-    //     &mut [Tok::Return, Tok::Semicolon] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(2);
-    //         name
-
-    //     },
-    // };
-
-    // let name = match self.tokens(2) { 
-    //     &mut [Tok::Break, Tok::Semicolon] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(2);
-    //         name
-
-    //     },
-    // };
-
-    // let name = match self.tokens(2) { 
-    //     &mut [Tok::Continue, Tok::Semicolon] => {
-    //         let name = std::mem::take(id);
-    //         self.consume(2);
-    //         name
-
-    //     },
-    // };
-
-
-
-    // match self.tokens(1)[0] {
-    //     // &mut [Tok::Function] => {self.func()},
-    //     &mut [Tok::Return] => {
-    //         self.consume(1);
-    //         self.expect(Tok::Semicolon)?;
-
-    //     },
-    //     &mut [Tok::Break] => {
-    //         self.consume(1);
-    //         self.expect(Tok::Semicolon)?;
-
-    //     },
-    //     &mut [Tok::Continue] => {
-    //         self.consume(1);
-    //         self.expect(Tok::Semicolon)?;
-
-    //     },
-    //     _ => {self.problem = Some(format!("Parsing Error: stmt").into()); None},
-    // }
-
-// args:
-// | exp
-// | exp Comma args
-
-fn args(&mut self) -> Option<Vec<u8>> {
-    let mut args_list = Vec::New();
-    Some(arg) = self.exp()?;
-    // self.exp()?;
-        loop {
-
-            if let Tok::Comma = self.tokens(1)[0] { 
-                self.consume(1);
-                self.args()?;
-                args_list.push_back(arg) //push args into args list
-            },
-            _ => {
-                self.problem = Some(format!("Parsing Error: args").into());
-                return None;
-            },
-            
-            
-        };
-
-        _ => {
-            self.problem = Some(format!("Parsing Error: args").into());
-            return None;
-        },
-
-
 }
-
-// exp: exp Equality boolexp
-// | exp NotEqual boolexp
-// | boolexp
-
-fn exp(&mut self) -> Option<()> {
-    self.boolexp()?;
-    match self.tokens(1)[0] { 
-        &mut [Tok::Equality] => {
-            self.consume(1);
-            self.boolexp()?;
-
-        },
-        &mut [Tok::NotEqual] => {
-            self.consume(1);
-            self.boolexp()?;
-
-        },
-        _ => {
-            self.problem = Some(format!("Parsing Error: exp").into());
-            return None;
-        },
-    };
-}
-// boolexp: boolexp Less addexp
-//    | boolexp LessEqual addexp
-//    | boolexp Greater addexp
-//    | boolexp GreaterEqual addexp
-//    | addexp
-fn boolexp(&mut self) -> Option<()> {
-    self.addexp()?;
-    match self.tokens(1)[0] { 
-        &mut [Tok::Less] => {
-            self.consume(1);
-            self.addexp()?;
-
-        },
-        &mut [Tok::LessEqual] => {
-            self.consume(1);
-            self.addexp()?;
-
-        },
-        &mut [Tok::Greater] => {
-            self.consume(1);
-            self.addexp()?;
-
-        },
-        &mut [Tok::GreaterEqual] => {
-            self.consume(1);
-            self.addexp()?;
-
-        },
-        _ => {
-            self.problem = Some(format!("Parsing Error: boolexp").into());
-            return None;
-        },
-    };
-}
-
-// addexp: addexp Plus multexp
-//   | addexp Substract multexp
-//   | multexp
-fn addexpr(&mut self) -> Option<()> {
-    let mut lhs = self.mulexpr()?;
-    
-    loop {
-        match *lex{
-            b'+' | b'-' => {
-                let op = *lex;
-                lex = lex.add(1); 
-                let rhs = self.mulexpr()?;
-                let temp = temp_name();
-                
-                // emit::bin_op(op, &temp, &lhs, &rhs); 
-                // do print instead
-                lhs = temp;
-            },
-            _ => return lhs,
-        }
-    }
-}
+fn main() -> Result<(), Box<dyn Error>> {
+    // env::set_var("RUST_BACKTRACE", "full");
 
     let args : Vec<String> = std::env::args().collect();
     let mut par = Par::make(&args[1])?;
@@ -1038,4 +789,3 @@ fn addexpr(&mut self) -> Option<()> {
 
     // Ok(())
 }
-
