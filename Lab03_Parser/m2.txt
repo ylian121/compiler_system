@@ -1,12 +1,16 @@
-# Test file to test our lexer
-#based on the lexer_test_cases.zip on the lab's canvas course file
+func add(int a, int b) {
+    return a + b;
+}
+
+func mul(int a, int b) {
+     return a * b;
+}
 
 func main() {
-  int a;
-  int b;
-  int c;
-  a = 100;
-  b = 50;
-  c = a + b;
-  print(c);
+    int a;
+    int b;
+    a = add(10, 2);
+    print(a);
+    b = mul(a, a + b);
+    print(b);
 }

@@ -54,10 +54,13 @@ impl Par {
     // prog:
     // | func prog
     fn parse(&mut self) -> Option<()> {
-        match self.tokens(1) {
-            &mut [Tok::Function] => {self.func()},
-            &mut [Tok::Empty] => {None},
-            _ => {self.problem = Some(format!("Parsing Error: program").into()); None},
+        loop {
+            match self.tokens(1) {
+                &mut [Tok::Function] => {self.func();},
+                &mut [Tok::Empty] => {return None;},
+                _ => {self.problem = Some(format!("Parsing Error: program").into()); return None;},
+            }
+
         }
     }
     
