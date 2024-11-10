@@ -17,14 +17,14 @@ struct Par {
     problem: Option<Box<dyn Error>>,
     // temp names --V
     t_count: usize,
-    l_count: usize,
+    // l_count: usize,
 }
 
 impl Par {
     fn make(file_path: &str) -> Result<Par, Box<dyn Error>> {
         Ok(Par{
             lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
-            t_count: 0, l_count: 0,
+            t_count: 0, // l_count: 0,
         })
     }
     fn tokens(&mut self, amt: usize) -> &mut [Tok] { // buffers token
@@ -43,12 +43,13 @@ impl Par {
         res
     }
 
-    fn temp_label(&mut self) -> Vec<u8> { // helps label temporary names
-        let mut res = Vec::from(b"label");
-        res.extend_from_slice(&self.l_count.to_string().into_bytes());
-        self.l_count += 1;
-        res
-    }
+    // what do we need this for?????
+    // fn temp_label(&mut self) -> Vec<u8> { // helps label temporary names
+    //     let mut res = Vec::from(b"label");
+    //     res.extend_from_slice(&self.l_count.to_string().into_bytes());
+    //     self.l_count += 1;
+    //     res
+    // }
     // TODO: Grammar stuff starts here ------------------------------------------------------------------------------
     // prog:
     // | func prog
@@ -762,14 +763,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     // env::set_var("RUST_BACKTRACE", "full");
 
     let args : Vec<String> = std::env::args().collect();
-    let par = Par::make(&args[1])?;
+    let mut par = Par::make(&args[1])?;
 
-    let Some(gram) = par.parse();
+    par.parse();
 
-    if let Some(err) = par.problem {
-        println!("Problem: {}", err);
-        return Err(err);
-    }
 
     Ok(())
 
