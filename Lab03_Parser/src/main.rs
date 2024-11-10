@@ -558,10 +558,9 @@ impl Par {
     //     | exp
     //     | exp Comma args
     fn fn_call(&mut self, fn_name: Vec<u8>) -> Option<Vec<u8>> {
-        let dst = self.temp_name();
-        print! ("call: {} = {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
-
         let mut first = true;
+        // take in all function call arguments
+        let mut arguments = Vec::new();
         loop {
             if let Tok::RightParen = self.tokens(1)[0] { // what if ')'?
                 self.consume(1);
@@ -570,7 +569,6 @@ impl Par {
             if !first{
 
                 self.expect(Tok::Comma)?; // remember '?'
-                print!(", ");
                 // if let Tok::Comma = self.tokens(1)[0] { // what if 'int'?
                 //     self.consume(1);
                 // } else {
@@ -579,14 +577,50 @@ impl Par {
                 // }
             }
             let argu = self.exp()?;
-            print!("{}", String::from_utf8_lossy(&argu));
+            arguments.push(argu);
             
             first = false;
+        }
+        let dst = self.temp_name();
+        
+        print! ("call: {} = {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
+        let mut argufirst = true;
+        while !arguments.is_empty() {
+            if !argufirst {print!(", ");}
+            print!("{}", String::from_utf8_lossy(&arguments.remove(0)));
+            argufirst = false
+        }
+        println!(" )");
+        Some(dst)
+
+        // let dst = self.temp_name();
+        // print! ("call: {} = {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
+
+        // let mut first = true;
+        // loop {
+        //     if let Tok::RightParen = self.tokens(1)[0] { // what if ')'?
+        //         self.consume(1);
+        //         break;
+        //     }
+        //     if !first{
+
+        //         self.expect(Tok::Comma)?; // remember '?'
+        //         print!(", ");
+        //         // if let Tok::Comma = self.tokens(1)[0] { // what if 'int'?
+        //         //     self.consume(1);
+        //         // } else {
+        //         //     self.problem = Some(format!("Parsing Error: Expected Comma...").into());
+        //         //     return None;
+        //         // }
+        //     }
+        //     let argu = self.exp()?;
+        //     print!("{}", String::from_utf8_lossy(&argu));
+            
+        //     first = false;
 
             
-        }
-        println!("))");
-        Some(dst)
+        // }
+        // println!("))");
     }
 
 
