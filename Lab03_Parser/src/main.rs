@@ -70,15 +70,27 @@ impl Par {
         }
         
     }
-    // TODOTODOTODO: YOU LEFT HERE
-    fn binOP (&mut self, op:Tok, lhs:Vec<u8>, rhs:Vec<u8>) -> Option<Vec<u8>> {
-        if let Tok::Multiply = op {
-            let dst = self.temp_name();
-            println!("{} = {} * {}", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs), String::from_utf8_lossy(&rhs));
-            Some(dst)
-        } else {
-            self.problem = Some(format!("Binary Operation Error").into()); None
-        }
+    // Bin_op does binary operators
+    fn bin_op (&mut self, op:Tok, lhs:Vec<u8>, rhs:Vec<u8>) -> Option<Vec<u8>> {
+        let dst = self.temp_name();
+        let ope;
+        match op {
+            Tok::Multiply => {ope = Vec::from(b"*");},
+            Tok::Divide => {ope = Vec::from(b"/");},
+            Tok::Modulus => {ope = Vec::from(b"%");},
+            Tok::Plus => {ope = Vec::from(b"+");},
+            Tok::Substract => {ope = Vec::from(b"-");},
+            Tok::Less => {ope = Vec::from(b"<");},
+            Tok::Greater => {ope = Vec::from(b">");},
+            Tok::LessEqual => {ope = Vec::from(b"<=");},
+            Tok::GreaterEqual => {ope = Vec::from(b">=");},
+            Tok::Equality => {ope = Vec::from(b"==");},
+            Tok::NotEqual => {ope = Vec::from(b"!=");},
+            _ => {self.problem = Some(format!("Binary Operation Error").into()); return None},
+        };
+
+        println!("{} = {} {} {}", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs),String::from_utf8_lossy(&ope), String::from_utf8_lossy(&rhs));
+        Some(dst)
     }
 
 
@@ -89,6 +101,7 @@ impl Par {
     // params: Int Ident Comma params
     //       | Int Ident
     fn func(&mut self) -> Option<()> {
+
         let name = match self.tokens(3) { // Func Ident LeftParen?
             &mut [Tok::Function, Tok::Ident(ref mut id), Tok::LeftParen] => {
                 let name = std::mem::take(id);
@@ -104,8 +117,6 @@ impl Par {
         print!("function header: {} ", String::from_utf8_lossy(&name)); // output function header
         
         let mut first = true;
-
-
         loop {
 
             if let Tok::RightParen = self.tokens(1)[0] { // what if ')'?
@@ -144,7 +155,7 @@ impl Par {
         }
 
         // continue with statements block
-        self.stmts()?;
+        self.stmts()
     }
 
 
@@ -191,17 +202,11 @@ impl Par {
     fn stmt(&mut self) -> Option<()> {
         match self.tokens(6) { // we're looking at 6 tokens in advance
             
-            // if is special, since one derivation is ambiguous so we just make a function for it
-            &mut[Tok::If, _, _, _, _, _, ] => {
-                self.if_block()?
-            }
-
-
             // While bool_exp block
             &mut[Tok::While, _, _, _, _, _, ] => {
                 self.consume(1);
                 print!("while (");
-                if let Some(cond) = self.bool_exp()? {
+                if let Some(cond) = self.bool_exp() {
                     println!("cond({}))", String::from_utf8_lossy(&cond));
                     self.stmts()
                 } else { None }
@@ -211,7 +216,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(2);
 
-                if let Some(rhs)= self.exp()? {
+                if let Some(rhs)= self.exp() {
                     println!("assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
@@ -223,11 +228,11 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(2);
 
-                if let Some(index)= self.exp()? { // NESTED IF KEEP AN EYE
+                if let Some(index)= self.exp() { // NESTED IF KEEP AN EYE
                     self.expect(Tok::RightBracket)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     self.expect(Tok::Assign)?;
 
-                    if let Some(rhs)= self.exp()? {
+                    if let Some(rhs)= self.exp() {
                         println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
 
                         self.expect(Tok::Semicolon);
@@ -240,7 +245,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(3);
 
-                if let Some(rhs)= self.exp()? {
+                if let Some(rhs)= self.exp() {
                     println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
@@ -266,7 +271,7 @@ impl Par {
             &mut [Tok::Print, Tok::LeftParen, _, _, _, _, ] => {
                 self.consume(2);
 
-                if let Some(value)= self.exp()? {
+                if let Some(value)= self.exp() {
                     println!("print: {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -279,7 +284,7 @@ impl Par {
             &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::RightParen, Tok::Semicolon, _,] => {
                 let name = std::mem::take(id);
                 self.consume(5);
-                println!("read: {}", String::from_utf8_lossy(&id));
+                println!("read: {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
@@ -288,7 +293,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(4);
 
-                if let Some(index)= self.exp()? {
+                if let Some(index)= self.exp() {
                     println!("read: {}[{}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     self.expect(Tok::RightBracket)?;
                     self.expect(Tok::RightParen)?;
@@ -307,7 +312,7 @@ impl Par {
             // slides say ordering matter, so we can put the more ambiguous one at the bottom of the specific derivation then
             &mut [Tok::Return, _, _, _, _, _, ] => {
                 self.consume(1);
-                if let Some(value) = self.exp()? {
+                if let Some(value) = self.exp() {
                     println!("return: {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::Semicolon)?;
                     Some(())
@@ -327,6 +332,11 @@ impl Par {
                 Some(())
             }
 
+            // if is special, since one derivation is ambiguous so we just make a function for it
+            &mut[Tok::If, _, _, _, _, _, ] => {
+                self.if_block()
+            }
+
             _ => {self.problem = Some(format!("Parsing error: statement formatting").into()); None}
         }
     }
@@ -337,7 +347,7 @@ impl Par {
         self.consume(1);
         print!("if(");
 
-        if let Some(cond) = self.bool_exp()? {
+        if let Some(cond) = self.bool_exp() {
             println!("cond({})", String::from_utf8_lossy(&cond));
 
             self.stmts()?;
@@ -359,7 +369,7 @@ impl Par {
     // baseexp: Num //DONE
     //        | Ident //DONE
     //        | Ident LeftBracket exp RightBracket //DONE-NEED fn exp()
-    //        | Ident LeftParen args RightBracket //DONE-NEED fn args()!!!!!!!!!!
+    //        | Ident LeftParen args RightBracket //DONE-NEED fn func_call
     //        | LeftParen exp RightParen //DONE-NEED fn exp()
     fn base_exp(&mut self) -> Option<Vec<u8>> {
         match self.tokens(2) {
@@ -368,9 +378,8 @@ impl Par {
                 self.consume(1);
                 let exp = self.exp()?;
                 if let Tok::RightParen = self.tokens(1)[0] {
-                    let dst = self.temp_name();
-                    println!("{} = ({})", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&exp));
-                    Some(dst)
+                    self.consume(1);
+                    Some(exp)
                 } else {
                     self.problem = Some(format!("(exp) format failed").into());
                     None
@@ -400,17 +409,9 @@ impl Par {
             },
 
             &mut[Tok::Ident(ref mut id), Tok::LeftParen] => {
-                let name = std::mem::take(id);
-                let args = self.args()?;
-                if let Tok::RightParen = self.tokens(1)[0] {
-                    let dst = self.temp_name();
-                    self.consume(1);
-                    println!("{} = {}({})", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&args));
-                    Some(dst)
-                } else {
-                    self.problem = Some(format!("function call format failed").into());
-                    None
-                }
+                let fn_name = std::mem::take(id);
+                self.consume(2);
+                self.fn_call(fn_name)
             }
 
             &mut[Tok::Ident(ref mut id), _,] => {
@@ -419,7 +420,7 @@ impl Par {
                 Some(name)
             },
 
-            _ => {self.problem = Some(format!("Base expression error").into()); None}
+            _ => {self.problem = Some(format!("expression error").into()); None}
         }
     }
 
@@ -428,33 +429,162 @@ impl Par {
     //        | multexp Modulus baseexp
     //        | baseexp
     fn mult_exp(&mut self) -> Option<Vec<u8>> {
-        let lhs_val = self.base_exp()?;
+        let mut lhs_val = self.base_exp()?;
         
         loop {
             if let Tok::Multiply = self.tokens(1)[0] {
                 self.consume(1);
                 // let op = Tok::Multiply;
-                let rhs = self.base_exp()?;
+                let rhs_val = self.base_exp()?;
                 // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Multiply, lhs_val, rhs_val)?;
             }
             else if let Tok::Divide = self.tokens(1)[0] {
                 self.consume(1);
                 // let op = Tok::Divide;
-                let rhs = self.base_exp()?;
+                let rhs_val = self.base_exp()?;
                 // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Divide, lhs_val, rhs_val)?;
             }
             else if let Tok::Modulus = self.tokens(1)[0] {
                 self.consume(1);
                 // let op = Tok::Modulus;
-                let rhs = self.base_exp()?;
+                let rhs_val = self.base_exp()?;
                 // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Modulus, lhs_val, rhs_val)?;
                 
             } else {
-                // what to do? //you left here
+                break Some(lhs_val);
             }
         }
-
     }
+
+    // addexp: addexp Plus multexp
+    //       | addexp Substract multexp
+    //       | multexp
+    fn add_exp(&mut self) -> Option<Vec<u8>> {
+        let mut lhs_val = self.mult_exp()?;
+        
+        loop {
+            if let Tok::Plus = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Multiply;
+                let rhs_val = self.mult_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Plus, lhs_val, rhs_val)?;
+            } else if let Tok::Substract = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Divide;
+                let rhs_val = self.mult_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Substract, lhs_val, rhs_val)?;
+            } else {
+                break Some(lhs_val);
+            }
+        }
+    }
+
+    // boolexp: boolexp Less addexp
+    //        | boolexp LessEqual addexp
+    //        | boolexp Greater addexp
+    //        | boolexp GreaterEqual addexp
+    //        | addexp
+    fn bool_exp(&mut self) -> Option<Vec<u8>> {
+        let mut lhs_val = self.add_exp()?;
+        
+        loop {
+            if let Tok::Less = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Multiply;
+                let rhs_val = self.add_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Less, lhs_val, rhs_val)?;
+            } else if let Tok::Greater = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Divide;
+                let rhs_val = self.add_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Greater, lhs_val, rhs_val)?;
+            } else if let Tok::LessEqual = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Divide;
+                let rhs_val = self.add_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::LessEqual, lhs_val, rhs_val)?;
+            } else if let Tok::GreaterEqual = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Divide;
+                let rhs_val = self.add_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::GreaterEqual, lhs_val, rhs_val)?;
+            }  else {
+                break Some(lhs_val);
+            }
+        }
+    }
+
+    // exp: exp Equality boolexp
+    //    | exp NotEqual boolexp
+    //    | boolexp
+    fn exp(&mut self) -> Option<Vec<u8>> {
+        let mut lhs_val = self.bool_exp()?;
+        
+        loop {
+            if let Tok::Equality = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Multiply;
+                let rhs_val = self.bool_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::Equality, lhs_val, rhs_val)?;
+            } else if let Tok::NotEqual = self.tokens(1)[0] {
+                self.consume(1);
+                // let op = Tok::Divide;
+                let rhs_val = self.bool_exp()?;
+                // call lhs = binOP
+                lhs_val = self.bin_op(Tok::NotEqual, lhs_val, rhs_val)?;
+            } else {
+                break Some(lhs_val);
+            }
+        }
+    }
+
+
+    // base_exp: Ident LeftParen args RightBracket
+    // args:
+    //     | exp
+    //     | exp Comma args
+    fn fn_call(&mut self, fn_name: Vec<u8>) -> Option<Vec<u8>> {
+        let dst = self.temp_name();
+        print! ("call: {} = {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
+
+        let mut first = true;
+        loop {
+            if let Tok::RightParen = self.tokens(1)[0] { // what if ')'?
+                self.consume(1);
+                break;
+            }
+            if !first{
+
+                self.expect(Tok::Comma)?; // remember '?'
+                print!(", ");
+                // if let Tok::Comma = self.tokens(1)[0] { // what if 'int'?
+                //     self.consume(1);
+                // } else {
+                //     self.problem = Some(format!("Parsing Error: Expected Comma...").into());
+                //     return None;
+                // }
+            }
+            let argu = self.exp()?;
+            print!("{}", String::from_utf8_lossy(&argu));
+            
+            first = false;
+
+            
+        }
+        println!("))");
+        Some(dst)
+    }
+
 
     
 
@@ -632,21 +762,33 @@ fn main() -> Result<(), Box<dyn Error>> {
     // env::set_var("RUST_BACKTRACE", "full");
 
     let args : Vec<String> = std::env::args().collect();
-    let mut lex = Lex::make(&args[1])?;
+    let par = Par::make(&args[1])?;
 
-    while let Some(tok) = lex.lex() {
-        match tok {
-            Tok::Ident(vec) | Tok::Num(vec) => {print!("{}, ", String::from_utf8_lossy(&vec[..]));},
-            _ => {print!("{:?}, ", tok);},
-        }
-    }
+    let Some(gram) = par.parse();
 
-    println!("");
-
-    if let Some(err) = lex.problem {
-        println!("Problem, line {}: {}", lex.line, err);
+    if let Some(err) = par.problem {
+        println!("Problem: {}", err);
         return Err(err);
     }
 
     Ok(())
+
+    // let args : Vec<String> = std::env::args().collect();
+    // let mut lex = Lex::make(&args[1])?;
+
+    // while let Some(tok) = lex.lex() {
+    //     match tok {
+    //         Tok::Ident(vec) | Tok::Num(vec) => {print!("{}, ", String::from_utf8_lossy(&vec[..]));},
+    //         _ => {print!("{:?}, ", tok);},
+    //     }
+    // }
+
+    // println!("");
+
+    // if let Some(err) = lex.problem {
+    //     println!("Problem, line {}: {}", lex.line, err);
+    //     return Err(err);
+    // }
+
+    // Ok(())
 }
