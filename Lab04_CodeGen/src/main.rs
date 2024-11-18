@@ -1,4 +1,7 @@
 // For this lab, all print!() and println!() that has '// CodeGen1' comment on top of it means it's been worked on
+// use stack to handle loops, push stack when you're getting into a loop. when the loop ends, just pop the loop out of the stack
+
+
 
 use std::iter::Peekable;
 use std::vec;
@@ -159,11 +162,14 @@ impl Par {
         }
 
         // continue with statements block
-        let retval = self.stmts();
+        // self.stmts()?;
 
-        // CodeGen1 - QUESTION: IS THIS LEGAL??
+        // continue with statements block
+        let func_retval = self.stmts()?;
+
+        // CodeGen1 - function ending done
         println!("%endfunc");
-        retval
+        Some(func_retval)
     }
 
 
@@ -215,6 +221,7 @@ impl Par {
             // While bool_exp block
             &mut[Tok::While, _, _, _, _, _, ] => {
                 self.consume(1);
+                // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                 print!("while (");
                 if let Some(cond) = self.bool_exp() {
                     println!("cond({}))", String::from_utf8_lossy(&cond));
@@ -227,7 +234,8 @@ impl Par {
                 self.consume(2);
 
                 if let Some(rhs)= self.exp() {
-                    println!("assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    // CodeGen1 - assign var done
+                    println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
                 } else { None }
@@ -243,7 +251,8 @@ impl Par {
                     self.expect(Tok::Assign)?;
 
                     if let Some(rhs)= self.exp() {
-                        println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
+                        // CodeGen1 - assign array elem done
+                        println!("%mov [{} + {}], {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
 
                         self.expect(Tok::Semicolon);
                         Some(())
@@ -256,7 +265,9 @@ impl Par {
                 self.consume(3);
 
                 if let Some(rhs)= self.exp() {
-                    println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    // CodeGen1 - declare then assign variable done
+                    println!("%int {}", String::from_utf8_lossy(&name));
+                    println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
                 } else { None }
@@ -266,14 +277,16 @@ impl Par {
                 let length = std::mem::take(num);
                 let name = std::mem::take(id);
                 self.consume(6);
-                println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
+                // CodeGen1 - Array declaration done
+                println!("%int[] {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
                 Some(())
             }
 
             &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Semicolon, _, _, _, ] => {
                 let name = std::mem::take(id);
                 self.consume(3);
-                println!("declare var: {}", String::from_utf8_lossy(&name));
+                // CodeGen1 - var declaration done
+                println!("%int {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
@@ -282,7 +295,8 @@ impl Par {
                 self.consume(2);
 
                 if let Some(value)= self.exp() {
-                    println!("print: {}", String::from_utf8_lossy(&value));
+                    // CodeGen1 - print stmt done
+                    println!("%out {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
@@ -294,7 +308,8 @@ impl Par {
             &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::RightParen, Tok::Semicolon, _,] => {
                 let name = std::mem::take(id);
                 self.consume(5);
-                println!("read: {}", String::from_utf8_lossy(&name));
+                // CodeGen1 - read stmt done
+                println!("%input {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
@@ -304,7 +319,8 @@ impl Par {
                 self.consume(4);
 
                 if let Some(index)= self.exp() {
-                    println!("read: {}[{}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    // CodeGen1 - read array stmt done
+                    println!("%input [{} + {}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     self.expect(Tok::RightBracket)?;
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -315,6 +331,7 @@ impl Par {
             
             &mut [Tok::Return, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
+                // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                 println!("return");
                 Some(())
             }
@@ -323,6 +340,7 @@ impl Par {
             &mut [Tok::Return, _, _, _, _, _, ] => {
                 self.consume(1);
                 if let Some(value) = self.exp() {
+                    // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                     println!("return: {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::Semicolon)?;
                     Some(())
@@ -332,12 +350,14 @@ impl Par {
             
             &mut [Tok::Break, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
+                // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                 println!("break");
                 Some(())
             }
 
             &mut [Tok::Continue, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
+                // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                 println!("continue");
                 Some(())
             }
@@ -355,9 +375,11 @@ impl Par {
     // If bool_exp block Else bool_exp block
     fn if_block(&mut self) -> Option<()> {
         self.consume(1);
+        // CodeGen1 - return TODOTODOTODO FOR CodeGen2
         print!("if(");
 
         if let Some(cond) = self.bool_exp() {
+            // CodeGen1 - return TODOTODOTODO FOR CodeGen2
             println!("cond({})", String::from_utf8_lossy(&cond));
 
             self.stmts()?;
@@ -365,6 +387,7 @@ impl Par {
             match self.tokens(1) {
                 &mut [Tok::Else] => {
                     self.consume(1);
+                    // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                     println!("else");
                     self.stmts()?;
                 },
@@ -409,7 +432,8 @@ impl Par {
                 if let Tok::RightBracket = self.tokens(1)[0] {
                     let dst = self.temp_name();
                     self.consume(1);
-                    println!("{} = {}[{}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    // CodeGen1 - assign var with array elem val done
+                    println!("%mov {}, [{} + {}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     Some(dst)
                 } else {
                     self.problem = Some(format!("array format failed").into());
@@ -589,13 +613,17 @@ impl Par {
         }
         let dst = self.temp_name();
         
-        print! ("call: {} = {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
+        // CodeGen1 - function call done
+        print! ("%call {}, {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
         let mut argufirst = true;
         while !arguments.is_empty() {
-            if !argufirst {print!(", ");}
+            // CodeGen1 - function call comma done
+            if !argufirst {print!(",");}
+            // CodeGen1 - function call arguments done
             print!("{}", String::from_utf8_lossy(&arguments.remove(0)));
             argufirst = false
         }
+        // CodeGen1 - function call finished done
         println!(")");
         Some(dst)
 
