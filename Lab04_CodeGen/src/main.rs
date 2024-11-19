@@ -589,7 +589,7 @@ impl Par {
     //     | exp Comma args
     fn fn_call(&mut self, fn_name: Vec<u8>) -> Option<Vec<u8>> {
         let mut first = true;
-        // take in all function call arguments
+        // take in all function call arguments, store it in a vector first (TREAT THIS AS A QUEUE!!!)
         let mut arguments = Vec::new();
         loop {
             if let Tok::RightParen = self.tokens(1)[0] { // what if ')'?
