@@ -278,6 +278,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(6);
                 // CodeGen1 - Array declaration done
+                // note: apparently Rust doesn't like spaces before left brackets
                 println!("%int[] {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
                 Some(())
             }
@@ -331,8 +332,8 @@ impl Par {
             
             &mut [Tok::Return, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
-                // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-                println!("return");
+                // CodeGen1 - return with no value is not needed, done
+                // println!("return");
                 Some(())
             }
             // Return exp Semicolon
