@@ -341,8 +341,8 @@ impl Par {
             &mut [Tok::Return, _, _, _, _, _, ] => {
                 self.consume(1);
                 if let Some(value) = self.exp() {
-                    // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-                    println!("return: {}", String::from_utf8_lossy(&value));
+                    // CodeGen1 - WIP
+                    println!("%ret {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::Semicolon)?;
                     Some(())
                 } else { None }
