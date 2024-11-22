@@ -289,7 +289,12 @@ impl Par {
 
                 if let Some(rhs)= self.exp() {
                     //println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
-                    println!("%int {}", String::from_utf8_lossy(&name));                     
+                    println!("%int {}", String::from_utf8_lossy(&name));     
+                    
+                    if let Some(_already_present) = self.types.last_mut().unwrap().insert(name.clone(), Type::Var) {
+                        panic!("variable name clash")
+                    }
+
                     println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
@@ -302,6 +307,9 @@ impl Par {
                 self.consume(6);
                 //println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
                 println!("%int[] {}, {}", String::from_utf8_lossy(&name));
+                if let Some(_already_present) = self.types.last_mut().unwrap().insert(name.clone(), Type::Arr) {
+                    panic!("array name clash")
+                }
                 Some(())
             }
 
@@ -310,6 +318,9 @@ impl Par {
                 self.consume(3);
                 //println!("declare var: {}", String::from_utf8_lossy(&name));
                 println!("%int {}", String::from_utf8_lossy(&name));
+                if let Some(_already_present) = self.types.last_mut().unwrap().insert(name.clone(), Type::Var) {
+                    panic!("variable name clash")
+                }
                 Some(())
             }
 
