@@ -329,6 +329,7 @@ impl Par {
 
                 if let Some(index)= self.exp() {
                     //println!("read: {}[{}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    println!("%input [{} + {}]",String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     self.expect(Tok::RightBracket)?;
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -340,6 +341,7 @@ impl Par {
             &mut [Tok::Return, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
                 //println!("return");
+                println!("return");
                 Some(())
             }
             // Return exp Semicolon
@@ -348,6 +350,7 @@ impl Par {
                 self.consume(1);
                 if let Some(value) = self.exp() {
                     //println!("return: {}", String::from_utf8_lossy(&value));
+                    println!("%ret {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::Semicolon)?;
                     Some(())
                 } else { None }
@@ -357,12 +360,14 @@ impl Par {
             &mut [Tok::Break, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
                 //println!("break");
+                println!("break");
                 Some(())
             }
 
             &mut [Tok::Continue, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
                 //println!("continue");
+                println!("continue");
                 Some(())
             }
 
@@ -434,6 +439,7 @@ impl Par {
                     let dst = self.temp_name();
                     self.consume(1);
                     //println!("{} = {}[{}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    println!("%mov {}, [{} + {}]",String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     Some(dst)
                 } else {
                     self.problem = Some(format!("array format failed").into());
@@ -614,13 +620,16 @@ impl Par {
         let dst = self.temp_name();
         
         //print! ("call: {} = {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
+        print! ("%call {}, {}(", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&fn_name));
         let mut argufirst = true;
         while !arguments.is_empty() {
-            if !argufirst {//print!(", ");}
+            if !argufirst {print!(",");}
             //print!("{}", String::from_utf8_lossy(&arguments.remove(0)));
+            print!("{}", String::from_utf8_lossy(&arguments.remove(0)));
             argufirst = false
         }
         //println!(")");
+        println!(")");
         Some(dst)
 
         // let dst = self.temp_name();
@@ -656,7 +665,7 @@ impl Par {
 
     
 
-    }
+    
 
 }
 
