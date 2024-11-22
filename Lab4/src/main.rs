@@ -112,7 +112,7 @@ impl Par {
             _ => {self.problem = Some(format!("Binary Operation Error").into()); return None},
         };
 
-        //println!("{} = {} {} {}", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs),String::from_utf8_lossy(&ope), String::from_utf8_lossy(&rhs));
+        ////println!("{} = {} {} {}", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs),String::from_utf8_lossy(&ope), String::from_utf8_lossy(&rhs));
         Some(dst)
     }
 
@@ -189,7 +189,7 @@ impl Par {
         match self.tokens(1) {
             &mut [Tok::LeftCurly] => {
                 self.consume(1);
-                println!("{{");
+                //println!("{{");
             },
             _ => {self.problem = Some(format!("Parsing Error: Expected statements block").into()); return None;},
         }
@@ -197,7 +197,7 @@ impl Par {
         loop {
             if let Tok::RightCurly = self.tokens(1)[0] {
                 self.consume(1);
-                println!("}}\n");
+                //println!("}}\n");
                 break Some(());
             }
             //if it wasn't a '}'... well then it's something else
@@ -230,7 +230,7 @@ impl Par {
                 self.consume(1);
                 //print!("while (");
                 if let Some(cond) = self.bool_exp() {
-                    println!("cond({}))", String::from_utf8_lossy(&cond));
+                    //println!("cond({}))", String::from_utf8_lossy(&cond));
                     self.stmts()
                 } else { None }
             }
@@ -240,7 +240,7 @@ impl Par {
                 self.consume(2);
 
                 if let Some(rhs)= self.exp() {
-                    println!("assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    //println!("assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
                 } else { None }
@@ -256,7 +256,7 @@ impl Par {
                     self.expect(Tok::Assign)?;
 
                     if let Some(rhs)= self.exp() {
-                        println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
+                        //println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
 
                         self.expect(Tok::Semicolon);
                         Some(())
@@ -269,7 +269,7 @@ impl Par {
                 self.consume(3);
 
                 if let Some(rhs)= self.exp() {
-                    println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    //println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
                 } else { None }
@@ -279,14 +279,14 @@ impl Par {
                 let length = std::mem::take(num);
                 let name = std::mem::take(id);
                 self.consume(6);
-                println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
+                //println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
                 Some(())
             }
 
             &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Semicolon, _, _, _, ] => {
                 let name = std::mem::take(id);
                 self.consume(3);
-                println!("declare var: {}", String::from_utf8_lossy(&name));
+                //println!("declare var: {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
@@ -295,7 +295,7 @@ impl Par {
                 self.consume(2);
 
                 if let Some(value)= self.exp() {
-                    println!("print: {}", String::from_utf8_lossy(&value));
+                    //println!("print: {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
@@ -307,7 +307,7 @@ impl Par {
             &mut [Tok::Read, Tok::LeftParen, Tok::Ident(ref mut id), Tok::RightParen, Tok::Semicolon, _,] => {
                 let name = std::mem::take(id);
                 self.consume(5);
-                println!("read: {}", String::from_utf8_lossy(&name));
+                //println!("read: {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
@@ -317,7 +317,7 @@ impl Par {
                 self.consume(4);
 
                 if let Some(index)= self.exp() {
-                    println!("read: {}[{}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    //println!("read: {}[{}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     self.expect(Tok::RightBracket)?;
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -328,7 +328,7 @@ impl Par {
             
             &mut [Tok::Return, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
-                println!("return");
+                //println!("return");
                 Some(())
             }
             // Return exp Semicolon
@@ -336,7 +336,7 @@ impl Par {
             &mut [Tok::Return, _, _, _, _, _, ] => {
                 self.consume(1);
                 if let Some(value) = self.exp() {
-                    println!("return: {}", String::from_utf8_lossy(&value));
+                    //println!("return: {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::Semicolon)?;
                     Some(())
                 } else { None }
@@ -345,13 +345,13 @@ impl Par {
             
             &mut [Tok::Break, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
-                println!("break");
+                //println!("break");
                 Some(())
             }
 
             &mut [Tok::Continue, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
-                println!("continue");
+                //println!("continue");
                 Some(())
             }
 
@@ -371,14 +371,14 @@ impl Par {
         //print!("if(");
 
         if let Some(cond) = self.bool_exp() {
-            println!("cond({})", String::from_utf8_lossy(&cond));
+            //println!("cond({})", String::from_utf8_lossy(&cond));
 
             self.stmts()?;
 
             match self.tokens(1) {
                 &mut [Tok::Else] => {
                     self.consume(1);
-                    println!("else");
+                    //println!("else");
                     self.stmts()?;
                 },
                 _ => {},
@@ -422,7 +422,7 @@ impl Par {
                 if let Tok::RightBracket = self.tokens(1)[0] {
                     let dst = self.temp_name();
                     self.consume(1);
-                    println!("{} = {}[{}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    //println!("{} = {}[{}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     Some(dst)
                 } else {
                     self.problem = Some(format!("array format failed").into());
@@ -609,7 +609,7 @@ impl Par {
             //print!("{}", String::from_utf8_lossy(&arguments.remove(0)));
             argufirst = false
         }
-        println!(")");
+        //println!(")");
         Some(dst)
 
         // let dst = self.temp_name();
@@ -639,7 +639,7 @@ impl Par {
 
             
         // }
-        // println!("))");
+        // //println!("))");
     }
 
 
@@ -836,10 +836,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     //     }
     // }
 
-    // println!("");
+    // //println!("");
 
     // if let Some(err) = lex.problem {
-    //     println!("Problem, line {}: {}", lex.line, err);
+    //     //println!("Problem, line {}: {}", lex.line, err);
     //     return Err(err);
     // }
 
