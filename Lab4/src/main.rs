@@ -263,12 +263,20 @@ impl Par {
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
                 } else { None }
+
+                if !self.type_check(self.types.len(), &fn_name, Type::Var) {
+                    panic!("Assign to undeclared var");
+                }
             }
 
             // Ident LeftBracket exp RightBracket Assign exp Semicolon
             &mut [Tok::Ident(ref mut id), Tok::LeftBracket , _, _, _, _,] => {
                 let name = std::mem::take(id);
                 self.consume(2);
+
+                if !self.type_check(self.types.len(), &fn_name, Type::Arr) {
+                    panic!("Assign to undeclared arr");
+                }
 
                 if let Some(index)= self.exp() { // NESTED IF KEEP AN EYE
                     self.expect(Tok::RightBracket)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -281,6 +289,11 @@ impl Par {
                         Some(())
                     } else {None}
                 } else { None }
+
+                if !self.type_check(self.types.len(), &fn_name, Type::Fn) {
+                    panic!("Attempted use of non existant function {}", &fn_name);
+                }
+
             }
 
             &mut [Tok::Int, Tok::Ident(ref mut id), Tok::Assign, _, _, _, ] => {
@@ -481,6 +494,11 @@ impl Par {
 
             &mut[Tok::Ident(ref mut id), _,] => {
                 let name = std::mem::take(id);
+
+                if !self.type_check(self.types.len(), &fn_name, Type::Fn) {
+                    panic!("Attempted use of non existant function {}", &name);
+                }
+
                 self.consume(1);
                 Some(name)
             },
