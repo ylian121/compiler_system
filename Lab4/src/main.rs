@@ -9,7 +9,7 @@ use std::iter::Peekable;
 use std::vec;
 use std::error::Error;
 use slice_deque::SliceDeque;
-use std:collections::HashMap;
+use std::collections::HashMap;
 // use std::env;
 
 #[derive(PartialEq)]
@@ -35,7 +35,7 @@ struct Par {
 
 impl Par {
     fn make(file_path: &str) -> Result<Par, Box<dyn Error>> {
-        let types = Vec::new()
+        let types = Vec::new();
 
         types.push(HashMap::new());
 
@@ -62,16 +62,23 @@ impl Par {
         res
     }
 
-    fn type_check(&mut self, i: usize, name: Vec<v8>, check_type: Type) -> Option<()> {
+    fn type_check(&mut self, i: usize, name: &Vec<u8>, check_type: Type) -> Option<()> {
+        // fn type_check(&mut self, i: usize, name: Vec<u8>, check_type: Type) -> Option<()> {
         if 0 == i{
-            return false;
+            self.problem = Some(format!("some errors!").into());
+            return None;
         }
 
         let i = i - 1;
 
         if let Some(symbol) = self.types[i].get(name){
-            if *symbol == check_type { true }
-            else { false }
+            if *symbol == check_type { 
+                return Some(());
+            }
+            else { 
+                self.problem = Some(format!("some errors!").into());
+                return None; 
+            }
         }
         else { self.type_check(i, name, check_type)}
     }
@@ -87,14 +94,41 @@ impl Par {
     // prog:
     // | func prog
     fn parse(&mut self) -> Option<()> {
+        self.types.push(HashMap::new());
+
+        
         loop {
             match self.tokens(1) {
-                &mut [Tok::Function] => {self.func();},
-                &mut [Tok::Empty] => {return None;},
-                _ => {self.problem = Some(format!("Parsing Error: program").into()); return None;},
+                &mut [Tok::Function] => {
+                    self.func()?; 
+                    // return None;
+                },
+                &mut [Tok::Empty] => {
+                    // return None;
+                },
+                _ => {
+                    self.problem = Some(format!("Parsing Error: program").into()); 
+                    // return None;
+                },
             }
 
         }
+        if let Some(Type::Fn) = self.types[0].get(&Vec::from("main").as_bytes()){
+            // break Ok(());
+            return Some(());
+        }else{
+            self.problem = Some(format!("err").into());
+            return None;
+        }
+        // if let Some(Type::Fn) = self.types[0].get(&Vec::from("main").as_bytes()){
+        //     // break Ok(());
+        //     return Some(());
+        // }else{
+        //     self.problem = Some(format!("err").into());
+        //     return None;
+        // }
+
+        self.types.pop()
     }
     
     fn expect (&mut self, t:Tok) -> Option<()> { // helper function thanks to Josue
@@ -154,6 +188,12 @@ impl Par {
         
         //print!("function header: {} ", String::from_utf8_lossy(&name)); // output function header
         print!("func {} (", String::from_utf8_lossy(&name));
+        if let Some(_already_present) = self.types[0].insert(name.clone(), Type::Fn){
+            self.problem = Some(format!("func nname dup").into());
+            return None;
+        }
+
+        
 
         let mut first = true;
         loop {
@@ -204,6 +244,7 @@ impl Par {
     // stmts: 
     //      | stmt stmts
     fn stmts(&mut self) -> Option<()> {
+        self.types.push(HashMap::new());
         match self.tokens(1) {
             &mut [Tok::LeftCurly] => {
                 self.consume(1);
@@ -221,6 +262,7 @@ impl Par {
             //if it wasn't a '}'... well then it's something else
             self.stmt()?;
         }
+        self.types.pop()
     }
 
     // stmt: Int LeftBracket Num RightBracket Ident Semicolon //DONE
@@ -264,9 +306,10 @@ impl Par {
                     Some(())
                 } else { None }
 
-                if !self.type_check(self.types.len(), &fn_name, Type::Var) {
-                    panic!("Assign to undeclared var");
-                }
+                self.type_check(self.types.len(), &name, Type::Var)?;
+                // if !self.type_check(self.types.len(), &name, Type::Var) {
+                //     panic!("Assign to undeclared var");
+                // }
             }
 
             // Ident LeftBracket exp RightBracket Assign exp Semicolon
@@ -274,7 +317,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(2);
 
-                if !self.type_check(self.types.len(), &fn_name, Type::Arr) {
+                if !self.type_check(self.types.len(), &name, Type::Arr) {
                     panic!("Assign to undeclared arr");
                 }
 
@@ -290,8 +333,8 @@ impl Par {
                     } else {None}
                 } else { None }
 
-                if !self.type_check(self.types.len(), &fn_name, Type::Fn) {
-                    panic!("Attempted use of non existant function {}", &fn_name);
+                if !self.type_check(self.types.len(), &name, Type::Fn) {
+                    panic!("Attempted use of non existant function {}", &name);
                 }
 
             }
@@ -300,13 +343,16 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(3);
 
+                println!("%int {}", String::from_utf8_lossy(&name)); 
+                if let Some(_already_present) = self.types.last_mut().unwrap().insert(name.clone(), Type::Var) {
+                    panic!("variable name clash")
+                }
+
                 if let Some(rhs)= self.exp() {
                     //println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
-                    println!("%int {}", String::from_utf8_lossy(&name));     
+                        
                     
-                    if let Some(_already_present) = self.types.last_mut().unwrap().insert(name.clone(), Type::Var) {
-                        panic!("variable name clash")
-                    }
+                    
 
                     println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -495,7 +541,7 @@ impl Par {
             &mut[Tok::Ident(ref mut id), _,] => {
                 let name = std::mem::take(id);
 
-                if !self.type_check(self.types.len(), &fn_name, Type::Fn) {
+                if !self.type_check(self.types.len(), &name, Type::Fn) {
                     panic!("Attempted use of non existant function {}", &name);
                 }
 
