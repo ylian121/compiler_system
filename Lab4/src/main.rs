@@ -113,6 +113,7 @@ impl Par {
         };
 
         ////println!("{} = {} {} {}", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs),String::from_utf8_lossy(&ope), String::from_utf8_lossy(&rhs));
+        println!("{} {}, {}, {}", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs),String::from_utf8_lossy(&ope), String::from_utf8_lossy(&rhs));
         Some(dst)
     }
 
@@ -138,13 +139,15 @@ impl Par {
         };
         
         //print!("function header: {} ", String::from_utf8_lossy(&name)); // output function header
-        
+        print!("func {} (", String::from_utf8_lossy(&name));
+
         let mut first = true;
         loop {
 
             if let Tok::RightParen = self.tokens(1)[0] { // what if ')'?
                 self.consume(1);
                 //print!("\n"); // finished reading params, newline
+                print!(")\n");
                 break;
             }
             if !first{
@@ -168,6 +171,7 @@ impl Par {
                 self.consume(1);
 
                 //print!(",{} ", String::from_utf8_lossy(&arg));
+                print!("%int {} ", String::from_utf8_lossy(&arg));
             } else {
                 self.problem = Some(format!("Parsing Error: Expected int...").into());
                 return None;
@@ -241,6 +245,7 @@ impl Par {
 
                 if let Some(rhs)= self.exp() {
                     //println!("assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    println!("%mov {} , {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
                 } else { None }
@@ -257,7 +262,7 @@ impl Par {
 
                     if let Some(rhs)= self.exp() {
                         //println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
-
+                        println!("%mov [{} + {}], {}",String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
                         self.expect(Tok::Semicolon);
                         Some(())
                     } else {None}
