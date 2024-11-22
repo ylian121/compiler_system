@@ -62,6 +62,20 @@ impl Par {
         res
     }
 
+    fn type_check(&mut self, i: usize, name: Vec<v8>, check_type: Type) -> Option<()> {
+        if 0 == i{
+            return false;
+        }
+
+        let i = i - 1;
+
+        if let Some(symbol) = self.types[i].get(name){
+            if *symbol == check_type { true }
+            else { false }
+        }
+        else { self.type_check(i, name, check_type)}
+    }
+
     // what do we need this for?????
     // fn temp_label(&mut self) -> Vec<u8> { // helps label temporary names
     //     let mut res = Vec::from(b"label");
