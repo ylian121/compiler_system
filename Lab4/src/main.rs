@@ -275,6 +275,8 @@ impl Par {
 
                 if let Some(rhs)= self.exp() {
                     //println!("declare - assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
+                    println!("%int {}", String::from_utf8_lossy(&name));                     
+                    println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
                 } else { None }
