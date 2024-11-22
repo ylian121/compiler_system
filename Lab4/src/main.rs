@@ -287,6 +287,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(6);
                 //println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
+                println!("%int[] {}, {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
@@ -294,6 +295,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(3);
                 //println!("declare var: {}", String::from_utf8_lossy(&name));
+                println!("%int {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
@@ -303,6 +305,7 @@ impl Par {
 
                 if let Some(value)= self.exp() {
                     //println!("print: {}", String::from_utf8_lossy(&value));
+                    println!("%out {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
@@ -315,6 +318,7 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(5);
                 //println!("read: {}", String::from_utf8_lossy(&name));
+                println!("%input {}", String::from_utf8_lossy(&name));
                 Some(())
             }
 
