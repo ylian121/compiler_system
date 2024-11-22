@@ -9,7 +9,16 @@ use std::iter::Peekable;
 use std::vec;
 use std::error::Error;
 use slice_deque::SliceDeque;
+use std:collections::HashMap;
 // use std::env;
+
+#[derive(PartialEq)]
+enum Type {
+    Var,
+    Arr,
+    Fn,
+
+}
 
 struct Par {
     lex: Lex, // generate token
@@ -18,13 +27,23 @@ struct Par {
     // temp names --V
     t_count: usize,
     // l_count: usize,
+    top_stack: Vec<String>,
+    bot_stack: Vec<String>,
+
+    types: Vec<HashMap<String, Type>>,
 }
 
 impl Par {
     fn make(file_path: &str) -> Result<Par, Box<dyn Error>> {
+        let types = Vec::new()
+
+        types.push(HashMap::new());
+
         Ok(Par{
             lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
             t_count: 0, // l_count: 0,
+            top_stack: Vec::new(), bot_stack: Vec::new(),
+            types,
         })
     }
     fn tokens(&mut self, amt: usize) -> &mut [Tok] { // buffers token
@@ -626,7 +645,7 @@ impl Par {
 
     
 
-
+    }
 
 }
 
