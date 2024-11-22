@@ -1,0 +1,43 @@
+%func main()
+%int a
+%int b
+%int c
+%mov a, 100
+%mov b, 50
+%int temp0
+%add temp0, a, b
+%mov c, temp0
+%out c
+%mov a, 100
+%mov b, 50
+%int temp1
+%sub temp1, a, b
+%mov c, temp1
+%out c
+%mov a, 100
+%mov b, 50
+%int temp2
+%mult temp2, a, b
+%mov c, temp2
+%out c
+%mov a, 100
+%mov b, 50
+%int temp3
+%div temp3, a, b
+%mov c, temp3
+%out c
+%mov a, 100
+%mov b, 50
+%int temp4
+%mod temp4, a, b
+%mov c, temp4
+%out c
+%mov a, 4
+%mov b, 7
+%int temp5
+%add temp5, a, 2
+%int temp6
+%mult temp6, temp5, b
+%mov c, temp6
+%out c
+%endfunc

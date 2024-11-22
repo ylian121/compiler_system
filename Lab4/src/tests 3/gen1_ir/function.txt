@@ -1,0 +1,27 @@
+%func add(%int a, %int b)
+%int temp0
+%add temp0, a, b
+%ret temp0
+%endfunc
+%func mul(%int a, %int b)
+%int temp1
+%mult temp1, a, b
+%ret temp1
+%endfunc
+%func main()
+%int a
+%int b
+%int c
+%mov a, 10
+%mov b, 2
+%int temp2
+%call temp2, add(a, b)
+%mov c, temp2
+%out c
+%int temp3
+%add temp3, a, b
+%int temp4
+%call temp4, mul(c, temp3)
+%mov c, temp4
+%out c
+%endfunc

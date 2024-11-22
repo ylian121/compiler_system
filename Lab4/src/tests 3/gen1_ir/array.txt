@@ -1,0 +1,27 @@
+%func main()
+%int[] array, 4
+%mov [array + 0], 2
+%int temp0
+%mov temp0, [array + 0]
+%out temp0
+%int temp1
+%mov temp1, [array + 0]
+%int temp2
+%mov temp2, [array + 0]
+%int temp3
+%add temp3, temp1, temp2
+%mov [array + 1], temp3
+%int temp4
+%mov temp4, [array + 1]
+%out temp4
+%int temp5
+%mov temp5, [array + 1]
+%int temp6
+%mult temp6, 2, 2
+%int temp7
+%add temp7, temp5, temp6
+%mov [array + 2], temp7
+%int temp8
+%mov temp8, [array + 2]
+%out temp8
+%endfunc

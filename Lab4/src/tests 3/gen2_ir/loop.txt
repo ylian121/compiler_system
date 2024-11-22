@@ -1,0 +1,14 @@
+%func main()
+%int i
+%mov i, 0
+:label0
+%int temp0
+%lt temp0, i, 10
+%branch_ifn temp0, :label1
+%out i
+%int temp1
+%add temp1, i, 1
+%mov i, temp1
+%jmp :label0
+:label1
+%endfunc

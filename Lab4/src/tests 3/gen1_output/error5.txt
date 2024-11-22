@@ -1,0 +1,7 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running `target/debug/cs152_simple ./tests/gen1/error5.txt`
+%func main()
+%int number
+thread 'main' panicked at src/parser/mod.rs:288:21:
+Assign to undeclared arr
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

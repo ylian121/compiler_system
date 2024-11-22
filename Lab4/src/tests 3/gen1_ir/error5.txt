@@ -1,0 +1,4 @@
+%func main()
+%int number
+%mov [number + 0], 100
+%endfunc

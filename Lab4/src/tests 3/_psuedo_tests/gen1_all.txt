@@ -1,0 +1,39 @@
+func my_func(int a, int b, int c) {
+    return a + b / c;
+}
+
+func main() {
+    int c;
+    int d = 5;
+    int[2] arr;
+    arr[0] = 10;
+    c = 1;
+    arr[1] = c + 19;
+
+    print(d); print(arr[0]); print(arr[1]); print(c);
+
+    c = arr[0]; print(c);
+    c = 1 + 1; print(c);
+    c = 1 - 1; print(c);
+    c = 7 * 5; print(c);
+    c = 5 / 2; print(c);
+    c = 5 % 3; print(c);
+    c = 5 < 3; print(c);
+    c = 3 < 5; print(c);
+    c = 3 <= 3; print(c);
+    c = 5 <= 3; print(c);
+    c = 5 > 3; print(c);
+    c = 3 > 5; print(c);
+    c = 3 >= 5; print(c);
+    c = 3 >= 3; print(c);
+    c = 3 != 3; print(c);
+    c = 4 != 3; print(c);
+    c = 3 == 3; print(c);
+    c = 4 == 3; print(c);
+    c = my_func(my_func(c, 5, 2), 5 % 3, 2 - 1); print(c);
+
+    print(arr[0]);
+    read(arr[1]);
+    print(arr[0]);
+    print(arr[1]);
+}

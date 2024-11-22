@@ -1,0 +1,4 @@
+%func main()
+%int[] array, 8
+%mov array, 8
+%endfunc

@@ -1,0 +1,11 @@
+%func main()
+%int a
+%int b
+%int c
+%mov a, 100
+%mov b, 50
+%int temp0
+%add temp0, a, b
+%mov c, temp0
+%out c
+%endfunc

@@ -1,0 +1,120 @@
+%func my_func(%int a, %int b, %int c)
+%int temp0
+%div temp0, b, c
+%int temp1
+%add temp1, a, temp0
+%ret temp1
+%endfunc
+%func main()
+%int c
+%int d
+%mov d, 5
+%int[] arr, 2
+%mov [arr + 0], 10
+%mov c, 1
+%int temp2
+%add temp2, c, 19
+%mov [arr + 1], temp2
+%out d
+%int temp3
+%mov temp3, [arr + 0]
+%out temp3
+%int temp4
+%mov temp4, [arr + 1]
+%out temp4
+%out c
+%int temp5
+%mov temp5, [arr + 0]
+%mov c, temp5
+%out c
+%int temp6
+%add temp6, 1, 1
+%mov c, temp6
+%out c
+%int temp7
+%sub temp7, 1, 1
+%mov c, temp7
+%out c
+%int temp8
+%mult temp8, 7, 5
+%mov c, temp8
+%out c
+%int temp9
+%div temp9, 5, 2
+%mov c, temp9
+%out c
+%int temp10
+%mod temp10, 5, 3
+%mov c, temp10
+%out c
+%int temp11
+%lt temp11, 5, 3
+%mov c, temp11
+%out c
+%int temp12
+%lt temp12, 3, 5
+%mov c, temp12
+%out c
+%int temp13
+%le temp13, 3, 3
+%mov c, temp13
+%out c
+%int temp14
+%le temp14, 5, 3
+%mov c, temp14
+%out c
+%int temp15
+%gt temp15, 5, 3
+%mov c, temp15
+%out c
+%int temp16
+%gt temp16, 3, 5
+%mov c, temp16
+%out c
+%int temp17
+%ge temp17, 3, 5
+%mov c, temp17
+%out c
+%int temp18
+%ge temp18, 3, 3
+%mov c, temp18
+%out c
+%int temp19
+%neq temp19, 3, 3
+%mov c, temp19
+%out c
+%int temp20
+%neq temp20, 4, 3
+%mov c, temp20
+%out c
+%int temp21
+%eq temp21, 3, 3
+%mov c, temp21
+%out c
+%int temp22
+%eq temp22, 4, 3
+%mov c, temp22
+%out c
+%int temp23
+%call temp23, my_func(c, 5, 2)
+%int temp24
+%mod temp24, 5, 3
+%int temp25
+%sub temp25, 2, 1
+%int temp26
+%call temp26, my_func(temp23, temp24, temp25)
+%mov c, temp26
+%out c
+%int temp27
+%mov temp27, [arr + 0]
+%out temp27
+%int temp28
+%input temp28
+%mov [arr + 1], temp28
+%int temp29
+%mov temp29, [arr + 0]
+%out temp29
+%int temp30
+%mov temp30, [arr + 1]
+%out temp30
+%endfunc

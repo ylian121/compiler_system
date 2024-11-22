@@ -1,0 +1,66 @@
+%func main()
+%int[] primes, 100
+%int i
+%mov i, 0
+:label0
+%int temp0
+%lt temp0, i, 100
+%branch_ifn temp0, :label1
+%mov [primes + i], 0
+%int temp1
+%add temp1, i, 1
+%mov i, temp1
+%jmp :label0
+:label1
+%mov i, 2
+:label2
+%int temp2
+%lt temp2, i, 10
+%branch_ifn temp2, :label3
+%int temp3
+%mov temp3, [primes + i]
+%int temp4
+%eq temp4, temp3, 0
+%branch_ifn temp4, :label4
+%int j
+%int temp5
+%add temp5, i, i
+%mov j, temp5
+:label6
+%int temp6
+%lt temp6, j, 100
+%branch_ifn temp6, :label7
+%mov [primes + j], 1
+%int temp7
+%add temp7, j, i
+%mov j, temp7
+%jmp :label6
+:label7
+%jmp :label5
+:label4
+:label5
+%int temp8
+%add temp8, i, 1
+%mov i, temp8
+%jmp :label2
+:label3
+%mov i, 2
+:label8
+%int temp9
+%lt temp9, i, 100
+%branch_ifn temp9, :label9
+%int temp10
+%mov temp10, [primes + i]
+%int temp11
+%eq temp11, temp10, 0
+%branch_ifn temp11, :label10
+%out i
+%jmp :label11
+:label10
+:label11
+%int temp12
+%add temp12, i, 1
+%mov i, temp12
+%jmp :label8
+:label9
+%endfunc

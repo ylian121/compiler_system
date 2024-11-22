@@ -1,0 +1,44 @@
+
+
+func main() {
+    int x = 0;
+    int c;
+
+    while x < 5 {
+        int i = 0;
+        while i < 2 {
+            print(10 * x + i);
+
+            i = i + 1;
+
+            break;
+            c = 1 / 0;
+        }
+
+        x = x + 1;
+        continue;
+        c = 1 / 0;
+    }
+
+    if x < 5 { c = 2/0; }
+    else { print(0); }
+    if x >= 5 { print(1); }
+    else { c = 3/0; }
+
+    print(2);
+    if x == 5 { print(3); }
+    print(4);
+    if x != 5 { c = 4/0; }
+    print(5);
+
+    if x >= 5 {
+        if x < 5 { c = 5/0; }
+        else {
+            if x < 5 { c = 6 / 0; }
+            else { print(6); }
+        }
+    }
+    else { c = 7/0; }
+
+}
+

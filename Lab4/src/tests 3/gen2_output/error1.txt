@@ -1,0 +1,7 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running `target/debug/cs152_simple ./tests/gen2/error1.txt`
+%func main()
+%int i
+%mov i, 0
+%endfunc
+Error: "On line 6, Parser: break called outside of a loop"

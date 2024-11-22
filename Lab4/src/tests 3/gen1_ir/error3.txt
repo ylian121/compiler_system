@@ -1,0 +1,7 @@
+%func add(%int a, %int b)
+%int temp0
+%add temp0, a, b
+%ret temp0
+%endfunc
+%func main()
+%int a
