@@ -327,9 +327,10 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(2);
 
-                if !self.type_check(self.types.len(), &name, Type::Arr) {
-                    panic!("Assign to undeclared arr");
-                }
+                // if !self.type_check(self.types.len(), &name, Type::Arr) {
+                //     panic!("Assign to undeclared arr");
+                // }
+                self.type_check(self.types.len(), &name, Type::Arr)?;
 
                 if let Some(index)= self.exp() { // NESTED IF KEEP AN EYE
                     self.expect(Tok::RightBracket)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -343,9 +344,10 @@ impl Par {
                     } else {None}
                 } else { None }
 
-                if !self.type_check(self.types.len(), &name, Type::Fn) {
-                    panic!("Attempted use of non existant function {}", &name);
-                }
+                // if !self.type_check(self.types.len(), &name, Type::Fn) {
+                //     panic!("Attempted use of non existant function {}", &name);
+                // }
+                self.type_check(self.types.len(), &name, Type::Fn)?;
 
             }
 
@@ -551,9 +553,10 @@ impl Par {
             &mut[Tok::Ident(ref mut id), _,] => {
                 let name = std::mem::take(id);
 
-                if !self.type_check(self.types.len(), &name, Type::Fn) {
-                    panic!("Attempted use of non existant function {}", &name);
-                }
+                // if !self.type_check(self.types.len(), &name, Type::Fn) {
+                //     panic!("Attempted use of non existant function {}", &name);
+                // }
+                self.type_check(self.types.len(), &name, Type::Fn)?;
 
                 self.consume(1);
                 Some(name)
