@@ -9,6 +9,7 @@ use slice_deque::SliceDeque;
 use std::collections::HashMap;
 // use std::env;
 
+
 #[derive(PartialEq)]
 enum Type {
     Var,
