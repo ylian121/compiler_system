@@ -65,7 +65,7 @@ impl Par {
     fn type_check(&mut self, i: usize, name: &Vec<u8>, check_type: Type) -> Option<()> {
         // fn type_check(&mut self, i: usize, name: Vec<u8>, check_type: Type) -> Option<()> {
         if 0 == i{
-            self.problem = Some(format!("some errors!").into());
+            self.problem = Some(format!("semantic errors!").into());
             return None;
         }
 
@@ -76,7 +76,7 @@ impl Par {
                 return Some(());
             }
             else { 
-                self.problem = Some(format!("some errors!").into());
+                self.problem = Some(format!("semantic errors!").into());
                 return None; 
             }
         }
@@ -239,6 +239,16 @@ impl Par {
         self.stmts()
     }
 
+
+    fn block(&mut self, params: Vec<String>) -> bool {
+        self.types.push(HashMap::new());
+            for param_list in params {
+                if let Some(_already_present) = self.types.last_mut().unwrap().insert((*param_list).to_string(), Type::Var){
+                    self.problem = Some(format!("duplicate parameter name").into());
+                    return None;
+                }
+            }
+    }
 
     // block: LeftCurly stmts RightCurly
     // stmts: 
