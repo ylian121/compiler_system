@@ -101,14 +101,14 @@ impl Par {
             match self.tokens(1) {
                 &mut [Tok::Function] => {
                     self.func()?; 
-                    // return None;
+                    return None;
                 },
                 &mut [Tok::Empty] => {
-                    // return None;
+                    return None;
                 },
                 _ => {
                     self.problem = Some(format!("Parsing Error: program").into()); 
-                    // return None;
+                    return None;
                 },
             }
 
@@ -117,9 +117,10 @@ impl Par {
             // break Ok(());
             return Some(());
         }else{
-            self.problem = Some(format!("err").into());
+            self.problem = Some(format!("Main not declared").into());
             return None;
         }
+
         // if let Some(Type::Fn) = self.types[0].get(&Vec::from("main").as_bytes()){
         //     // break Ok(());
         //     return Some(());
@@ -188,10 +189,12 @@ impl Par {
         
         //print!("function header: {} ", String::from_utf8_lossy(&name)); // output function header
         print!("func {} (", String::from_utf8_lossy(&name));
+
         if let Some(_already_present) = self.types[0].insert(name.clone(), Type::Fn){
-            self.problem = Some(format!("func nname dup").into());
+            self.problem = Some(format!("function name duplicate").into());
             return None;
         }
+
 
         
 
