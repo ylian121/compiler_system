@@ -240,15 +240,15 @@ impl Par {
     }
 
 
-    fn block(&mut self, params: Vec<String>) -> bool {
-        self.types.push(HashMap::new());
-            for param_list in params {
-                if let Some(_already_present) = self.types.last_mut().unwrap().insert((*param_list).to_string(), Type::Var){
-                    self.problem = Some(format!("duplicate parameter name").into());
-                    return None;
-                }
-            }
-    }
+    // fn block(&mut self, params: Vec<String>) -> bool {
+    //     self.types.push(HashMap::new());
+    //         for param_list in params {
+    //             if let Some(_already_present) = self.types.last_mut().unwrap().insert((*param_list).to_string(), Type::Var){
+    //                 self.problem = Some(format!("duplicate parameter name").into());
+    //                 return None;
+    //             }
+    //         }
+    // }
 
     // block: LeftCurly stmts RightCurly
     // stmts: 
