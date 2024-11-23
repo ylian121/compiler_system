@@ -376,8 +376,10 @@ impl Par {
             }
 
             &mut [Tok::Int, Tok::LeftBracket, Tok::Num(ref mut num), Tok::RightBracket, Tok::Ident(ref mut id), Tok::Semicolon] => {
+                if &num[..] == b"0" { panic!("Cannot declare array size 0"); }
                 let length = std::mem::take(num);
                 let name = std::mem::take(id);
+
                 self.consume(6);
                 //println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
                 println!("%int[] {}, {}", String::from_utf8_lossy(&name));
