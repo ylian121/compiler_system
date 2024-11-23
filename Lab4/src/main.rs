@@ -30,7 +30,7 @@ struct Par {
     top_stack: Vec<String>,
     bot_stack: Vec<String>,
 
-    types: Vec<HashMap<String, Type>>,
+    types: Vec<HashMap<Vec<u8>, Type>>,
 }
 
 impl Par {
@@ -113,7 +113,9 @@ impl Par {
             }
 
         }
-        if let Some(Type::Fn) = self.types[0].get(&Vec::from("main").as_bytes()){
+        // if let Some(Type::Fn) = self.types[0].get(&Vec::from("main").as_bytes()){
+
+        if let Some(Type::Fn) = self.types[0].get(&Vec::from("main")){
             // break Ok(());
             return Some(());
         }else{
@@ -129,7 +131,9 @@ impl Par {
         //     return None;
         // }
 
-        self.types.pop()
+        self.types.pop();
+
+        return None;
     }
     
     fn expect (&mut self, t:Tok) -> Option<()> { // helper function thanks to Josue
@@ -270,12 +274,13 @@ impl Par {
             if let Tok::RightCurly = self.tokens(1)[0] {
                 self.consume(1);
                 //println!("}}\n");
-                break Some(());
+                Some(());
             }
             //if it wasn't a '}'... well then it's something else
             self.stmt()?;
         }
-        self.types.pop()
+        self.types.pop();
+        None
     }
 
     // stmt: Int LeftBracket Num RightBracket Ident Semicolon //DONE
