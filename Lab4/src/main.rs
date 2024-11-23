@@ -307,7 +307,7 @@ impl Par {
             &mut[Tok::While, _, _, _, _, _, ] => {
                 self.consume(1);
                 //print!("while (");
-                if let Some(cond) = self.bool_exp() {
+                if let Some(_cond) = self.bool_exp() {
                     //println!("cond({}))", String::from_utf8_lossy(&cond));
                     self.stmts()
                 } else { None }
@@ -495,7 +495,7 @@ impl Par {
         self.consume(1);
         //print!("if(");
 
-        if let Some(cond) = self.bool_exp() {
+        if let Some(_cond) = self.bool_exp() {
             //println!("cond({})", String::from_utf8_lossy(&cond));
 
             self.stmts()?;
