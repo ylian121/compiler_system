@@ -349,13 +349,10 @@ impl Par {
                         println!("%mov [{} + {}], {}",String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
                         self.expect(Tok::Semicolon);
                         // Some(())
-                    } else { return None; }
-                } else { return None; }
-
                         self.expect(Tok::Semicolon);
-                        Some(())
-                    } else {None}
-                } else { None }
+                        Some(());
+                    } else {return None}
+                } else {return None }
 
                 // if !self.type_check(self.types.len(), &name, Type::Fn) {
                 //     panic!("Attempted use of non existant function {}", &name);
