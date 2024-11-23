@@ -382,7 +382,7 @@ impl Par {
 
                 self.consume(6);
                 //println!("declare array: {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
-                println!("%int[] {}, {}", String::from_utf8_lossy(&name));
+                println!("%int[] {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
                 if let Some(_already_present) = self.types.last_mut().unwrap().insert(name.clone(), Type::Arr) {
                     panic!("array name clash")
                 }
