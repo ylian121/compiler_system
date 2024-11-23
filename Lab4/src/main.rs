@@ -35,7 +35,7 @@ struct Par {
 
 impl Par {
     fn make(file_path: &str) -> Result<Par, Box<dyn Error>> {
-        let types = Vec::new();
+        let mut types = Vec::new();
 
         types.push(HashMap::new());
 
@@ -261,7 +261,7 @@ impl Par {
     // stmts: 
     //      | stmt stmts
     fn stmts(&mut self) -> Option<()> {
-        self.types.push(HashMap::new());
+        // self.types.push(HashMap::new());
         match self.tokens(1) {
             &mut [Tok::LeftCurly] => {
                 self.consume(1);
@@ -279,8 +279,8 @@ impl Par {
             //if it wasn't a '}'... well then it's something else
             self.stmt()?;
         }
-        self.types.pop();
-        None
+        // self.types.pop();
+        // None
     }
 
     // stmt: Int LeftBracket Num RightBracket Ident Semicolon //DONE
@@ -321,13 +321,14 @@ impl Par {
                     //println!("assign var: {} = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     println!("%mov {} , {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
-                    Some(())
-                } else { None }
+                    // Some(())
+                } else { return None; }
 
                 self.type_check(self.types.len(), &name, Type::Var)?;
                 // if !self.type_check(self.types.len(), &name, Type::Var) {
                 //     panic!("Assign to undeclared var");
                 // }
+                Some (())
             }
 
             // Ident LeftBracket exp RightBracket Assign exp Semicolon
@@ -348,14 +349,16 @@ impl Par {
                         //println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
                         println!("%mov [{} + {}], {}",String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
                         self.expect(Tok::Semicolon);
-                        Some(())
-                    } else {None}
-                } else { None }
+                        // Some(())
+                    } else { return None; }
+                } else { return None; }
 
                 // if !self.type_check(self.types.len(), &name, Type::Fn) {
                 //     panic!("Attempted use of non existant function {}", &name);
                 // }
                 self.type_check(self.types.len(), &name, Type::Fn)?;
+
+                Some(())
 
             }
 
