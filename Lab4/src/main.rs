@@ -1,9 +1,6 @@
-// TODO01: create Par struct
-// TODO02: create Par impl and its functions
-// TODO03: move lexing procedure to par's fn make()
-// TODO04: modify main function to call parser instead of lexer
-// TODO05: deal with temp values in expressions function
-// TODO06: Add the rest of the grammar rules into the parser impl
+//code gen
+//semantic type checking
+
 
 use std::iter::Peekable;
 use std::vec;
