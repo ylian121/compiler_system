@@ -251,8 +251,9 @@ impl Par {
         // self.stmts()?;
 
         // continue with statements block
+        self.types.push(HashMap::new());
         let func_retval = self.stmts(parameters)?;
-
+        self.types.pop();
         // CodeGen1 - function ending done
         println!("%endfunc");
         Some(func_retval)
@@ -263,7 +264,7 @@ impl Par {
     // stmts: 
     //      | stmt stmts
     fn stmts(&mut self, params: Vec<String>) -> Option<()> {
-        self.types.push(HashMap::new());
+        
 
         // puts all function parameters in scope of stmts CAUTION: MIGHT GIVE YOU ERROR
         for param in params {
@@ -285,7 +286,6 @@ impl Par {
         loop {
             if let Tok::RightCurly = self.tokens(1)[0] {
                 self.consume(1);
-                self.types.pop();
                 //println!("}}\n");
                 break Some(());
             }
