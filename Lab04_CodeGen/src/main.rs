@@ -25,8 +25,8 @@ struct Par {
     // temp names --V
     t_count: usize,
     // l_count: usize,
-    top_stack: Vec<String>,
-    bot_stack: Vec<String>,
+    // top_stack: Vec<String>,
+    // bot_stack: Vec<String>,
 
     types: Vec<HashMap<Vec<u8>, Type>>,
 }
@@ -40,7 +40,7 @@ impl Par {
         Ok(Par{
             lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
             t_count: 0, // l_count: 0,
-            top_stack: Vec::new(), bot_stack: Vec::new(),
+            // top_stack: Vec::new(), bot_stack: Vec::new(),
             types,
         })
     }
@@ -78,7 +78,7 @@ impl Par {
                 return None; 
             }
         }
-        else { self.type_check(i, name, check_type)}
+        else { Some(self.type_check(i, name, check_type)?)}
     }
 
     // what do we need this for?????
@@ -92,17 +92,16 @@ impl Par {
     // prog:
     // | func prog
     fn parse(&mut self) -> Option<()> {
-        self.types.push(HashMap::new());
+        // self.types.push(HashMap::new()); // already have in fn make()
 
         
         loop {
             match self.tokens(1) {
                 &mut [Tok::Function] => {
                     self.func()?; 
-                    return None;
                 },
                 &mut [Tok::Empty] => {
-                    return None;
+                    break;
                 },
                 _ => {
                     self.problem = Some(format!("Parsing Error: program").into()); 
@@ -115,6 +114,7 @@ impl Par {
 
         if let Some(Type::Fn) = self.types[0].get(&Vec::from("main")){
             // break Ok(());
+            self.types.pop();
             return Some(());
         }else{
             self.problem = Some(format!("Main not declared").into());
@@ -129,9 +129,8 @@ impl Par {
         //     return None;
         // }
 
-        self.types.pop();
 
-        return None;
+        // return None;
     }
     
     fn expect (&mut self, t:Tok) -> Option<()> { // helper function thanks to Josue
@@ -163,6 +162,12 @@ impl Par {
             _ => {self.problem = Some(format!("Binary Operation Error").into()); return None},
         };
 
+
+        if let Some(_already_present) = self.types[0].insert(dst.clone(), Type::Var){
+            self.problem = Some(format!("temp name duplicate").into());
+            return None;
+        }
+
         // CodeGen1 - BinEq Done
         println!("{} {}, {}, {}",String::from_utf8_lossy(&ope), String::from_utf8_lossy(&dst), String::from_utf8_lossy(&lhs), String::from_utf8_lossy(&rhs));
         Some(dst)
@@ -176,7 +181,6 @@ impl Par {
     // params: Int Ident Comma params
     //       | Int Ident
     fn func(&mut self) -> Option<()> {
-
         let name = match self.tokens(3) { // Func Ident LeftParen?
             &mut [Tok::Function, Tok::Ident(ref mut id), Tok::LeftParen] => {
                 let name = std::mem::take(id);
@@ -199,7 +203,7 @@ impl Par {
 
 
         
-
+        let mut parameters: Vec<String> = Vec::new(); // we'll use this to pass function parameters to function block
         let mut first = true;
         loop {
 
@@ -232,6 +236,7 @@ impl Par {
                 self.consume(1);
 
                 //print!(",{} ", String::from_utf8_lossy(&arg));
+                parameters.push(String::from_utf8_lossy(&arg).into()); // copies arg to put in parameters vector, so we can pass to fn stmts()
                 print!("%int {}", String::from_utf8_lossy(&arg));
             } else {
                 self.problem = Some(format!("Parsing Error: Expected int...").into());
@@ -246,7 +251,7 @@ impl Par {
         // self.stmts()?;
 
         // continue with statements block
-        let func_retval = self.stmts()?;
+        let func_retval = self.stmts(parameters)?;
 
         // CodeGen1 - function ending done
         println!("%endfunc");
@@ -257,8 +262,17 @@ impl Par {
     // block: LeftCurly stmts RightCurly
     // stmts: 
     //      | stmt stmts
-    fn stmts(&mut self) -> Option<()> {
-        // self.types.push(HashMap::new());
+    fn stmts(&mut self, params: Vec<String>) -> Option<()> {
+        self.types.push(HashMap::new());
+
+        // puts all function parameters in scope of stmts CAUTION: MIGHT GIVE YOU ERROR
+        for param in params {
+            if let Some(_already_present) = self.types.last_mut().unwrap().insert(param.into(), Type::Var) {
+                self.problem = Some(format!("Duplicate parameter name!").into ());
+
+                return None;
+            }
+        }
         match self.tokens(1) {
             &mut [Tok::LeftCurly] => {
                 self.consume(1);
@@ -271,14 +285,13 @@ impl Par {
         loop {
             if let Tok::RightCurly = self.tokens(1)[0] {
                 self.consume(1);
+                self.types.pop();
                 //println!("}}\n");
-                Some(());
+                break Some(());
             }
             //if it wasn't a '}'... well then it's something else
             self.stmt()?;
         }
-        // self.types.pop();
-        // None
     }
 
     // stmt: Int LeftBracket Num RightBracket Ident Semicolon //DONE
@@ -308,7 +321,7 @@ impl Par {
                 print!("while (");
                 if let Some(cond) = self.bool_exp() {
                     println!("cond({}))", String::from_utf8_lossy(&cond));
-                    self.stmts()
+                    Some(self.stmts(Vec::new())?)
                 } else { None }
             }
 
@@ -317,13 +330,14 @@ impl Par {
                 self.consume(2);
 
                 if let Some(rhs)= self.exp() {
+
+                    self.type_check(self.types.len(), &name, Type::Var)?;
                     // CodeGen1 - assign var done
                     println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     // Some(())
-                } else { return None; }
+                } else { return None }
 
-                self.type_check(self.types.len(), &name, Type::Var)?;
                 // if !self.type_check(self.types.len(), &name, Type::Var) {
                 //     panic!("Assign to undeclared var");
                 // }
@@ -402,6 +416,14 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(3);
                 // CodeGen1 - var declaration done
+
+
+
+                if let Some(_already_present) = self.types[0].insert(name.clone(), Type::Var){
+                    self.problem = Some(format!("Variable name duplicate").into());
+                    return None;
+                }
+
                 println!("%int {}", String::from_utf8_lossy(&name));
                 Some(())
             }
@@ -435,6 +457,9 @@ impl Par {
                 self.consume(4);
 
                 if let Some(index)= self.exp() {
+
+                    // check if array exist
+                    self.type_check(self.types.len(), &name, Type::Arr)?;
                     // CodeGen1 - read array stmt done
                     println!("%input [{} + {}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     self.expect(Tok::RightBracket)?;
@@ -498,14 +523,14 @@ impl Par {
             // CodeGen1 - return TODOTODOTODO FOR CodeGen2
             println!("cond({})", String::from_utf8_lossy(&cond));
 
-            self.stmts()?;
+            self.stmts(Vec::new())?;
 
             match self.tokens(1) {
                 &mut [Tok::Else] => {
                     self.consume(1);
                     // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                     println!("else");
-                    self.stmts()?;
+                    self.stmts(Vec::new())?;
                 },
                 _ => {},
             }
@@ -548,6 +573,9 @@ impl Par {
                 if let Tok::RightBracket = self.tokens(1)[0] {
                     let dst = self.temp_name();
                     self.consume(1);
+
+                    // Check if array exist
+                    self.type_check(self.types.len(), &name, Type::Arr)?;
                     // CodeGen1 - assign var with array elem val done
                     println!("%mov {}, [{} + {}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     Some(dst)
@@ -561,16 +589,15 @@ impl Par {
             &mut[Tok::Ident(ref mut id), Tok::LeftParen] => {
                 let fn_name = std::mem::take(id);
                 self.consume(2);
+                self.type_check(self.types.len(), &fn_name, Type::Fn)?;
                 self.fn_call(fn_name)
             }
 
             &mut[Tok::Ident(ref mut id), _,] => {
                 let name = std::mem::take(id);
 
-                // if !self.type_check(self.types.len(), &name, Type::Fn) {
-                //     panic!("Attempted use of non existant function {}", &name);
-                // }
-                self.type_check(self.types.len(), &name, Type::Fn)?;
+                // check if name is var
+                self.type_check(self.types.len(), &name, Type::Var)?;
 
                 self.consume(1);
                 Some(name)
@@ -710,6 +737,10 @@ impl Par {
     //     | exp
     //     | exp Comma args
     fn fn_call(&mut self, fn_name: Vec<u8>) -> Option<Vec<u8>> {
+        // first of all, check if function name exist
+        self.type_check(self.types.len(), &fn_name, Type::Fn)?;
+
+
         let mut first = true;
         // take in all function call arguments, store it in a vector first (TREAT THIS AS A QUEUE!!!)
         let mut arguments = Vec::new();
@@ -729,6 +760,7 @@ impl Par {
                 // }
             }
             let argu = self.exp()?;
+            // TODO SEMCHECK
             arguments.push(argu);
             
             first = false;
