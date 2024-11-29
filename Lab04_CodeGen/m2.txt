@@ -1,4 +1,7 @@
 func add(int a, int b) {
+    int c;
+    c = 1;
+    d = 1;
     return a + b;
 }
 

@@ -24,7 +24,7 @@ struct Par {
     problem: Option<Box<dyn Error>>,
     // temp names --V
     t_count: usize,
-    // l_count: usize,
+    l_count: usize,
     // top_stack: Vec<String>,
     // bot_stack: Vec<String>,
 
@@ -39,7 +39,7 @@ impl Par {
 
         Ok(Par{
             lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
-            t_count: 0, // l_count: 0,
+            t_count: 0, l_count: 0,
             // top_stack: Vec::new(), bot_stack: Vec::new(),
             types,
         })
@@ -81,13 +81,15 @@ impl Par {
         else { Some(self.type_check(i, name, check_type)?)}
     }
 
-    // what do we need this for?????
-    // fn temp_label(&mut self) -> Vec<u8> { // helps label temporary names
-    //     let mut res = Vec::from(b"label");
-    //     res.extend_from_slice(&self.l_count.to_string().into_bytes());
-    //     self.l_count += 1;
-    //     res
-    // }
+    // jump labels
+    fn temp_label(&mut self) -> Vec<u8> { // helps label temporary names
+        let mut res = Vec::from(b"label");
+        res.extend_from_slice(&self.l_count.to_string().into_bytes());
+        self.l_count += 1;
+        res
+    }
+
+
     // Grammar stuff starts here ------------------------------------------------------------------------------
     // prog:
     // | func prog
@@ -517,22 +519,30 @@ impl Par {
     fn if_block(&mut self) -> Option<()> {
         self.consume(1);
         // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-        print!("if(");
+        let label1 = self.temp_label();
+        // print!("if(");
 
         if let Some(cond) = self.bool_exp() {
             // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-            println!("cond({})", String::from_utf8_lossy(&cond));
+            // println!("cond({})", String::from_utf8_lossy(&cond));
+            println!("%branch_ifn {}, :{}", String::from_utf8_lossy(&cond), String::from_utf8_lossy(&label1));
 
             self.stmts(Vec::new())?;
 
+            // if no else stmt, just add label1 at the end
+            // if yes else stmt, unconditional jump to skip else first then add label 1
             match self.tokens(1) {
                 &mut [Tok::Else] => {
                     self.consume(1);
                     // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-                    println!("else");
+                    let label2 = self.temp_label();
+                    println!("%jmp :{}", String::from_utf8_lossy(&label2));
+                    println!(":{}", String::from_utf8_lossy(&label1));
+                    // println!("else");
                     self.stmts(Vec::new())?;
+                    println!(":{}", String::from_utf8_lossy(&label2));
                 },
-                _ => {},
+                _ => {println!(":{}", String::from_utf8_lossy(&label1));},
             }
 
             Some(())
