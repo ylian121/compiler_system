@@ -320,10 +320,17 @@ impl Par {
             &mut[Tok::While, _, _, _, _, _, ] => {
                 self.consume(1);
                 // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-                print!("while (");
+                // print!("while (");
+                let label1 = self.temp_label();
+                let label2 = self.temp_label();
+                println!(":{}", String::from_utf8_lossy(&label1));
                 if let Some(cond) = self.bool_exp() {
-                    println!("cond({}))", String::from_utf8_lossy(&cond));
-                    Some(self.stmts(Vec::new())?)
+                    // println!("cond({}))", String::from_utf8_lossy(&cond));
+                    println!("%branch_ifn {}, :{}", String::from_utf8_lossy(&cond), String::from_utf8_lossy(&label2));
+                    let retval = self.stmts(Vec::new())?;
+                    println!("%jmp :{}", String::from_utf8_lossy(&label1));
+                    println!(":{}", String::from_utf8_lossy(&label2));
+                    Some(retval)
                 } else { None }
             }
 
