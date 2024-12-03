@@ -25,8 +25,10 @@ struct Par {
     // temp names --V
     t_count: usize,
     l_count: usize,
-    // top_stack: Vec<String>,
-    // bot_stack: Vec<String>,
+
+    // used for break/continue
+    top_stack: Vec<String>,
+    bot_stack: Vec<String>,
 
     types: Vec<HashMap<Vec<u8>, Type>>,
 }
@@ -40,7 +42,7 @@ impl Par {
         Ok(Par{
             lex: Lex::make(file_path)?, toks: SliceDeque::new(), problem:None,
             t_count: 0, l_count: 0,
-            // top_stack: Vec::new(), bot_stack: Vec::new(),
+            top_stack: Vec::new(), bot_stack: Vec::new(),
             types,
         })
     }
@@ -323,6 +325,9 @@ impl Par {
                 // print!("while (");
                 let label1 = self.temp_label();
                 let label2 = self.temp_label();
+
+                self.top_stack.push(String::from_utf8_lossy(&label1).into());
+                self.bot_stack.push(String::from_utf8_lossy(&label2).into());
                 println!(":{}", String::from_utf8_lossy(&label1));
                 if let Some(cond) = self.bool_exp() {
                     // println!("cond({}))", String::from_utf8_lossy(&cond));
@@ -330,6 +335,8 @@ impl Par {
                     let retval = self.stmts(Vec::new())?;
                     println!("%jmp :{}", String::from_utf8_lossy(&label1));
                     println!(":{}", String::from_utf8_lossy(&label2));
+                    self.top_stack.pop();
+                    self.bot_stack.pop();
                     Some(retval)
                 } else { None }
             }
@@ -345,7 +352,7 @@ impl Par {
                     println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     // Some(())
-                } else { return None }
+                } else { self.problem = Some(format!("Variable assign error").into()); return None }
 
                 // if !self.type_check(self.types.len(), &name, Type::Var) {
                 //     panic!("Assign to undeclared var");
@@ -374,8 +381,8 @@ impl Par {
                         // Some(())
                         self.expect(Tok::Semicolon);
                         Some(());
-                    } else {return None}
-                } else {return None }
+                    } else {self.problem = Some(format!("Assign value to array element error").into()); return None}
+                } else {self.problem = Some(format!("Array index error").into()); return None }
 
                 // if !self.type_check(self.types.len(), &name, Type::Fn) {
                 //     panic!("Attempted use of non existant function {}", &name);
@@ -403,7 +410,7 @@ impl Par {
                     println!("%mov {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&rhs));
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
-                } else { None }
+                } else {self.problem = Some(format!("Variable assign error").into()); None }
             }
 
             &mut [Tok::Int, Tok::LeftBracket, Tok::Num(ref mut num), Tok::RightBracket, Tok::Ident(ref mut id), Tok::Semicolon] => {
@@ -447,7 +454,7 @@ impl Par {
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
-                } else { None }
+                } else {self.problem = Some(format!("Print value error").into()); None }
 
             }
 
@@ -475,7 +482,7 @@ impl Par {
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
                     Some(())
-                } else { None }
+                } else {self.problem = Some(format!("Read value error").into()); None }
             }
 
             
@@ -494,21 +501,27 @@ impl Par {
                     println!("%ret {}", String::from_utf8_lossy(&value));
                     self.expect(Tok::Semicolon)?;
                     Some(())
-                } else { None }
+                } else {self.problem = Some(format!("Return value error").into()); None }
             }
 
             
             &mut [Tok::Break, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
                 // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-                println!("break");
+                // println!("break"); // aaaaaaaaaaaaaaa
+                
+                println!("%jmp :{}", self.bot_stack.last().expect("Break called outside loop"));
+                
                 Some(())
             }
 
             &mut [Tok::Continue, Tok::Semicolon, _, _, _, _, ] => {
                 self.consume(2);
                 // CodeGen1 - return TODOTODOTODO FOR CodeGen2
-                println!("continue");
+                // println!("continue");
+                
+                println!("%jmp :{}", self.top_stack.last().expect("Break called outside loop"));
+
                 Some(())
             }
 
@@ -554,7 +567,7 @@ impl Par {
 
             Some(())
         }
-        else { None }
+        else { self.problem = Some(format!("If condition error").into()); None }
     }
 
     // baseexp: Num //DONE
@@ -1008,6 +1021,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut par = Par::make(&args[1])?;
 
     par.parse();
+    if let Some(problem) = par.problem{
+        return Err(problem);
+    }
+    if let Some(problem) = par.lex.problem{
+        return Err(problem);
+    }
 
 
     Ok(())
