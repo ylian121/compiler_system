@@ -65,7 +65,15 @@ impl Par {
     fn type_check(&mut self, i: usize, name: &Vec<u8>, check_type: Type) -> Option<()> {
         // fn type_check(&mut self, i: usize, name: Vec<u8>, check_type: Type) -> Option<()> {
         if 0 == i{
-            self.problem = Some(format!("semantic errors!").into());
+            if Type::Var == check_type {
+                self.problem = Some(format!("Undeclared Variable: {}", String::from_utf8_lossy(name)).into());    
+            } else if Type::Fn == check_type {
+                self.problem = Some(format!("Undeclared Function: {}", String::from_utf8_lossy(name)).into());
+            } else if Type::Arr == check_type {
+                self.problem = Some(format!("Undeclared Array: {}", String::from_utf8_lossy(name)).into());
+            } else {
+                self.problem = Some(format!("Undeclared Something: {}", String::from_utf8_lossy(name)).into());
+            }
             return None;
         }
 
@@ -76,7 +84,8 @@ impl Par {
                 return Some(());
             }
             else { 
-                self.problem = Some(format!("semantic errors!").into());
+                println!("{}", check_type as u8);
+                self.problem = Some(format!("Data type mismatch: {}", String::from_utf8_lossy(&name)).into());
                 return None; 
             }
         }
@@ -354,9 +363,6 @@ impl Par {
                     // Some(())
                 } else { self.problem = Some(format!("Variable assign error").into()); return None }
 
-                // if !self.type_check(self.types.len(), &name, Type::Var) {
-                //     panic!("Assign to undeclared var");
-                // }
                 Some (())
             }
 
@@ -365,9 +371,6 @@ impl Par {
                 let name = std::mem::take(id);
                 self.consume(2);
 
-                // if !self.type_check(self.types.len(), &name, Type::Arr) {
-                //     panic!("Assign to undeclared arr");
-                // }
                 self.type_check(self.types.len(), &name, Type::Arr)?;
 
                 if let Some(index)= self.exp() { // NESTED IF KEEP AN EYE
@@ -378,16 +381,11 @@ impl Par {
                         //println!("assign arr: {}[{}] = {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
                         println!("%mov [{} + {}], {}",String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&rhs));
                         self.expect(Tok::Semicolon);
-                        // Some(())
-                        self.expect(Tok::Semicolon);
                         Some(());
                     } else {self.problem = Some(format!("Assign value to array element error").into()); return None}
                 } else {self.problem = Some(format!("Array index error").into()); return None }
 
-                // if !self.type_check(self.types.len(), &name, Type::Fn) {
-                //     panic!("Attempted use of non existant function {}", &name);
-                // }
-                self.type_check(self.types.len(), &name, Type::Fn)?;
+                self.type_check(self.types.len(), &name, Type::Arr)?;
 
                 Some(())
             }
@@ -422,8 +420,9 @@ impl Par {
                 // CodeGen1 - Array declaration done
                 // note: apparently Rust doesn't like spaces before left brackets
                 println!("%int[] {}, {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&length));
-                if let Some(_already_present) = self.types.last_mut().unwrap().insert(name.clone(), Type::Arr) {
-                    panic!("array name clash")
+                if let Some(_already_present) = self.types[0].insert(name.clone(), Type::Arr){
+                    self.problem = Some(format!("Array name duplicate").into());
+                    return None;
                 }
                 Some(())
             }
@@ -520,7 +519,7 @@ impl Par {
                 // CodeGen1 - return TODOTODOTODO FOR CodeGen2
                 // println!("continue");
                 
-                println!("%jmp :{}", self.top_stack.last().expect("Break called outside loop"));
+                println!("%jmp :{}", self.top_stack.last().expect("Continue called outside loop"));
 
                 Some(())
             }
