@@ -476,7 +476,9 @@ impl Par {
                     // check if array exist
                     self.type_check(self.types.len(), &name, Type::Arr)?;
                     // CodeGen1 - read array stmt done
-                    println!("%input [{} + {}]", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
+                    let dst = self.temp_name();
+                    println!("%input {}",  String::from_utf8_lossy(&dst));
+                    println!("%mov [{} + {}], {}", String::from_utf8_lossy(&name), String::from_utf8_lossy(&index), String::from_utf8_lossy(&dst));
                     self.expect(Tok::RightBracket)?;
                     self.expect(Tok::RightParen)?;
                     self.expect(Tok::Semicolon)?; // MIGHT CAUSE PROBLEM, KEEP AN EYE HERE
@@ -802,7 +804,7 @@ impl Par {
         let mut argufirst = true;
         while !arguments.is_empty() {
             // CodeGen1 - function call comma done
-            if !argufirst {print!(",");}
+            if !argufirst {print!(", ");}
             // CodeGen1 - function call arguments done
             print!("{}", String::from_utf8_lossy(&arguments.remove(0)));
             argufirst = false
@@ -933,16 +935,16 @@ impl Lex {
             // '<' and '<=' cases
             b'<' => {self.it.next();
                 match self.it.peek()? {
-                    b'=' => {self.it.next(); Some(Tok::GreaterEqual)},
-                    _ => {Some(Tok::Greater)}
+                    b'=' => {self.it.next(); Some(Tok::LessEqual)},
+                    _ => {Some(Tok::Less)}
                 }
             },
 
             // '>' and '>=' cases
             b'>' => {self.it.next();
                 match self.it.peek()? {
-                    b'=' => {self.it.next(); Some(Tok::LessEqual)},
-                    _ => {Some(Tok::Less)}
+                    b'=' => {self.it.next(); Some(Tok::GreaterEqual)},
+                    _ => {Some(Tok::Greater)}
                 }
             },
 
