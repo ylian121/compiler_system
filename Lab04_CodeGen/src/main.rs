@@ -57,6 +57,7 @@ impl Par {
 
     fn temp_name(&mut self) -> Vec<u8> { // deals with naming temporary values
         let mut res = Vec::from(b"temp");
+        println!("%int {}{}", String::from_utf8_lossy(&res), self.t_count);
         res.extend_from_slice(&self.t_count.to_string().into_bytes());
         self.t_count += 1;
         res
@@ -207,7 +208,7 @@ impl Par {
         };
         
         //print!("function header: {} ", String::from_utf8_lossy(&name)); // output function header
-        print!("func {}(", String::from_utf8_lossy(&name));
+        print!("%func {}(", String::from_utf8_lossy(&name));
 
         if let Some(_already_present) = self.types[0].insert(name.clone(), Type::Fn){
             self.problem = Some(format!("function name duplicate").into());
@@ -247,7 +248,6 @@ impl Par {
             if let Tok::Ident(ref mut id) = self.tokens(1)[0] { // what if 'int'?
                 let arg = std::mem::take(id);
                 self.consume(1);
-
                 //print!(",{} ", String::from_utf8_lossy(&arg));
                 parameters.push(String::from_utf8_lossy(&arg).into()); // copies arg to put in parameters vector, so we can pass to fn stmts()
                 print!("%int {}", String::from_utf8_lossy(&arg));
@@ -606,6 +606,7 @@ impl Par {
                     // Check if array exist
                     self.type_check(self.types.len(), &name, Type::Arr)?;
                     // CodeGen1 - assign var with array elem val done
+                    // println!("%int {}, [{} + {}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     println!("%mov {}, [{} + {}]", String::from_utf8_lossy(&dst), String::from_utf8_lossy(&name), String::from_utf8_lossy(&index));
                     Some(dst)
                 } else {
