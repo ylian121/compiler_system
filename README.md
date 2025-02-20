@@ -13,3 +13,34 @@ This project is developing a compiler using Rust for an experimental programming
 
 (iv) development of the code generator (part II) - Optimizes and finalizes the generated IR for efficient execution   
 
+# Installation  
+
+**Install Rust:**   
+Run the following command to install Rust :  
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+**Verify:**
+```sh
+rustc --version
+```
+```sh
+cargo --version
+```
+
+
+
+**Instructions to Compile:**  
+**Clone the Repository:**   
+```sh
+https://github.com/ylian121/compiler.git
+```
+```sh
+cd compiler
+```
+
+**Compile and Run the Project:**   
+```sh
+cargo run
+```
